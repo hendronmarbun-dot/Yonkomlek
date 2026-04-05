@@ -2,247 +2,194 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Data Barang Yonkomlek</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yonkomlek Bot Data</title>
 
 <style>
 body {
   font-family: Arial;
-  padding: 20px;
-  background: #f5f5f5;
+  margin: 0;
+  background: #f3f4f6;
 }
 
-.topbar {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
+/* HEADER */
+.header {
+  background: #1e3a5f;
+  color: white;
+  padding: 15px 20px;
 }
+.header h2 { margin: 0; }
 
-.logout {
-  background:#c0392b;
-  color:white;
-  padding:8px 12px;
-  text-decoration:none;
-  border-radius:6px;
-}
-
+/* CARD */
 .card {
   background: white;
-  padding: 16px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 10px;
+  flex: 1;
+  text-align: center;
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+/* FLEX */
+.flex {
+  display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
-input, select, button {
+/* FORM */
+input, select {
   padding: 8px;
+  margin: 5px;
+  width: 150px;
 }
 
+/* BUTTON */
 button {
+  padding: 8px 12px;
+  background: #1e3a5f;
+  color: white;
+  border: none;
   cursor: pointer;
 }
 
+/* TABLE */
 table {
   width: 100%;
   border-collapse: collapse;
   background: white;
 }
-
 th, td {
-  border: 1px solid #ddd;
   padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
 }
-
-th {
-  background: #eee;
-}
-
-.btn {
-  padding: 5px 8px;
-  cursor: pointer;
-  border: none;
-}
-
-.edit { background: orange; color: white; }
-.delete { background: red; color: white; }
-
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-  <h2>📦 Data Barang Yonkomlek</h2>
-  <a class="logout" href="/logout">Logout</a>
+<div class="header">
+  <h2>📦 Yonkomlek Bot Data</h2>
 </div>
 
-<div class="card">
-  <div class="form-row">
-    <select id="kompi">
-      <option>KI-KOM</option>
-      <option>KI-MAR</option>
-      <option>KI-BAN</option>
-      <option>KI-OPS</option>
-      <option>KI-LEK</option>
-      <option>KI-NIK</option>
-      <option>LOG</option>
-    </select>
+<!-- STATS -->
+<div class="flex" id="stats"></div>
 
-    <input id="nama" placeholder="Nama barang">
-    <input id="jumlah" type="number" placeholder="Jumlah">
-    <input id="rusak" type="number" placeholder="Rusak">
-    <input id="pinjam" type="number" placeholder="Dipinjam">
-    <input id="ket" placeholder="Keterangan">
+<!-- FORM -->
+<div style="padding:10px;">
+  <select id="kompi">
+    <option>Kompi Markas</option>
+    <option>Kompi Komunikasi</option>
+    <option>Kompi Pernika</option>
+    <option>Kompi Bantuan</option>
+  </select>
 
-    <button onclick="simpan()">Simpan</button>
-  </div>
+  <input id="nama" placeholder="Nama Barang">
+  <input id="jumlah" type="number" placeholder="Jumlah">
+  <input id="baik" type="number" placeholder="Baik">
+  <input id="rusak" type="number" placeholder="Rusak">
+  <input id="pinjam" type="number" placeholder="Dipinjam">
+  <input id="ket" placeholder="Keterangan">
+
+  <button onclick="tambah()">Simpan</button>
 </div>
 
-<div class="card">
+<!-- TABLE -->
 <table>
 <thead>
 <tr>
-<th>Nama</th>
-<th>Kompi</th>
-<th>Jumlah</th>
-<th>Rusak</th>
-<th>Dipinjam</th>
-<th>Siap</th>
-<th>Keterangan</th>
-<th>Aksi</th>
+  <th>Nama</th>
+  <th>Kompi</th>
+  <th>Jumlah</th>
+  <th>Rusak</th>
+  <th>Dipinjam</th>
+  <th>Siap</th>
+  <th>Aksi</th>
 </tr>
 </thead>
 <tbody id="tabel"></tbody>
 </table>
-</div>
 
 <script>
 let data = [];
-let editId = null;
 
-async function load() {
-  const res = await fetch('/api/data');
+function hitungSiap(x){
+  return x.jumlah - x.rusak - x.pinjam;
+}
 
-  if (res.status === 401) {
-    window.location.href = '/login';
-    return;
-  }
-
+async function load(){
+  let res = await fetch('/api/data');
   data = await res.json();
   render();
 }
 
-async function save() {
-  const res = await fetch('/api/data', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(data)
-  });
-
-  if (res.status === 401) {
-    window.location.href = '/login';
-    return;
-  }
-}
-
-function siap(x){
-  return Math.max(0, (x.jumlah || 0) - (x.rusak || 0) - (x.pinjam || 0));
-}
-
-async function simpan() {
-  const kompi = document.getElementById('kompi').value;
-  const nama = document.getElementById('nama').value;
-  const jumlah = parseInt(document.getElementById('jumlah').value)||0;
-  const rusak = parseInt(document.getElementById('rusak').value)||0;
-  const pinjam = parseInt(document.getElementById('pinjam').value)||0;
-  const ket = document.getElementById('ket').value;
-
-  if(!nama) return alert("Nama kosong");
-
-  if(editId === null){
-    data.push({
-      id: Date.now(),
-      kompi,
-      nama,
-      jumlah,
-      rusak,
-      pinjam,
-      baik: Math.max(0, jumlah - rusak),
-      keterangan: ket
-    });
-  } else {
-    const x = data.find(a=>a.id===editId);
-    x.kompi = kompi;
-    x.nama = nama;
-    x.jumlah = jumlah;
-    x.rusak = rusak;
-    x.pinjam = pinjam;
-    x.baik = Math.max(0, jumlah - rusak);
-    x.keterangan = ket;
-    editId = null;
-  }
-
-  await save();
-  reset();
-  render();
-}
-
-function edit(id){
-  const x = data.find(a=>a.id===id);
-
-  document.getElementById('kompi').value = x.kompi;
-  document.getElementById('nama').value = x.nama;
-  document.getElementById('jumlah').value = x.jumlah;
-  document.getElementById('rusak').value = x.rusak;
-  document.getElementById('pinjam').value = x.pinjam;
-  document.getElementById('ket').value = x.keterangan || '';
-
-  editId = id;
-}
-
-async function hapus(id){
-  if(!confirm("Hapus?")) return;
-
-  data = data.filter(a=>a.id!==id);
-  await save();
-  render();
-}
-
-function reset(){
-  document.getElementById('nama').value="";
-  document.getElementById('jumlah').value="";
-  document.getElementById('rusak').value="";
-  document.getElementById('pinjam').value="";
-  document.getElementById('ket').value="";
-}
-
 function render(){
-  const tb = document.getElementById('tabel');
-  tb.innerHTML="";
+  let t = document.getElementById('tabel');
+  t.innerHTML = '';
 
-  data.forEach(x=>{
-    tb.innerHTML += `
+  let total=0, baik=0, rusak=0, pinjam=0, siap=0;
+
+  data.forEach((x,i)=>{
+    let s = hitungSiap(x);
+
+    total += x.jumlah;
+    baik += x.baik;
+    rusak += x.rusak;
+    pinjam += x.pinjam;
+    siap += s;
+
+    t.innerHTML += `
     <tr>
       <td>${x.nama}</td>
       <td>${x.kompi}</td>
       <td>${x.jumlah}</td>
       <td>${x.rusak}</td>
       <td>${x.pinjam}</td>
-      <td>${siap(x)}</td>
-      <td>${x.keterangan || '-'}</td>
+      <td>${s}</td>
       <td>
-        <button class="btn edit" onclick="edit(${x.id})">Edit</button>
-        <button class="btn delete" onclick="hapus(${x.id})">Hapus</button>
+        <button onclick="hapus(${i})">Hapus</button>
       </td>
-    </tr>
-    `;
+    </tr>`;
   });
+
+  document.getElementById('stats').innerHTML = `
+    <div class="card">Total Unit<br>${total}</div>
+    <div class="card">Baik<br>${baik}</div>
+    <div class="card">Rusak<br>${rusak}</div>
+    <div class="card">Dipinjam<br>${pinjam}</div>
+    <div class="card">Siap<br>${siap}</div>
+  `;
+}
+
+async function tambah(){
+  let obj = {
+    kompi: document.getElementById('kompi').value,
+    nama: document.getElementById('nama').value,
+    jumlah: Number(document.getElementById('jumlah').value),
+    baik: Number(document.getElementById('baik').value),
+    rusak: Number(document.getElementById('rusak').value),
+    pinjam: Number(document.getElementById('pinjam').value),
+    keterangan: document.getElementById('ket').value
+  };
+
+  data.push(obj);
+  await simpan();
+}
+
+async function hapus(i){
+  data.splice(i,1);
+  await simpan();
+}
+
+async function simpan(){
+  await fetch('/api/data',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+
+  load();
 }
 
 load();
