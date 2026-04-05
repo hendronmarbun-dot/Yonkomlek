@@ -1,0 +1,21 @@
+{
+  "name": "yonkomlek-bot-data",
+  "version": "1.0.0",
+  "description": "Sistem Database Inventaris Satuan Yonkomlek dengan WhatsApp Bot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "bot": "node whatsapp-bot.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.21",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "node-telegram-bot-api": "^0.67.0",
+    "pino": "^10.3.1",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "author": "Yonkomlek",
+  "license": "ISC"
+}
