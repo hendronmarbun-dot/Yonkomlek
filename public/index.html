@@ -1,199 +1,612 @@
+
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yonkomlek Bot Data</title>
-
 <style>
-body {
-  font-family: Arial;
-  margin: 0;
-  background: #f3f4f6;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans, 'Segoe UI', sans-serif); background: var(--color-background-tertiary, #f5f5f0); color: var(--color-text-primary, #1a1a1a); min-height: 100vh; }
 
-/* HEADER */
-.header {
-  background: #1e3a5f;
-  color: white;
-  padding: 15px 20px;
-}
-.header h2 { margin: 0; }
+  .header { background: #1a2744; color: white; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 36px; height: 36px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: white; flex-shrink: 0; }
+  .header-title { font-size: 16px; font-weight: 500; }
+  .header-sub { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 1px; }
+  .header-right { margin-left: auto; display: flex; gap: 8px; }
 
-/* CARD */
-.card {
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
-  margin: 10px;
-  flex: 1;
-  text-align: center;
-}
+  .tab-bar { background: #1e3057; display: flex; }
+  .tab { padding: 10px 20px; font-size: 13px; cursor: pointer; color: rgba(255,255,255,0.6); border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .tab.active { color: white; border-bottom-color: #4CAF50; }
+  .tab:hover { color: rgba(255,255,255,0.9); }
 
-/* FLEX */
-.flex {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
+  .main { padding: 16px; max-width: 1100px; margin: 0 auto; }
 
-/* FORM */
-input, select {
-  padding: 8px;
-  margin: 5px;
-  width: 150px;
-}
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .stat-card { background: var(--color-background-primary, white); border-radius: 8px; border: 0.5px solid var(--color-border-tertiary, #e0e0e0); padding: 12px 14px; }
+  .stat-label { font-size: 11px; color: var(--color-text-secondary, #666); margin-bottom: 4px; }
+  .stat-value { font-size: 22px; font-weight: 500; }
+  .stat-value.green { color: #2e7d32; }
+  .stat-value.red { color: #c62828; }
+  .stat-value.amber { color: #e65100; }
+  .stat-value.blue { color: #1565c0; }
 
-/* BUTTON */
-button {
-  padding: 8px 12px;
-  background: #1e3a5f;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
+  .card { background: var(--color-background-primary, white); border-radius: 10px; border: 0.5px solid var(--color-border-tertiary, #e0e0e0); padding: 16px; margin-bottom: 14px; }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary, #555); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 0.5px solid var(--color-border-tertiary, #eee); display: flex; align-items: center; gap: 8px; }
+  .card-title .kompiBadge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
 
-/* TABLE */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-}
-th, td {
-  padding: 8px;
-  border-bottom: 1px solid #ddd;
-  text-align: center;
-}
+  .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 11px; color: var(--color-text-secondary, #666); }
+  .form-group input, .form-group select { font-size: 13px; padding: 7px 10px; border: 0.5px solid var(--color-border-secondary, #ccc); border-radius: 6px; background: var(--color-background-primary, white); color: var(--color-text-primary, #1a1a1a); }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: #1565c0; box-shadow: 0 0 0 2px rgba(21,101,192,0.15); }
+
+  .btn { padding: 8px 16px; border-radius: 6px; border: 0.5px solid var(--color-border-secondary, #ccc); font-size: 13px; cursor: pointer; font-family: inherit; background: var(--color-background-primary, white); color: var(--color-text-primary, #1a1a1a); transition: all 0.15s; }
+  .btn:hover { background: var(--color-background-secondary, #f5f5f5); }
+  .btn.primary { background: #1a2744; color: white; border-color: #1a2744; }
+  .btn.primary:hover { background: #243563; }
+  .btn.success { background: #2e7d32; color: white; border-color: #2e7d32; }
+  .btn.danger-btn { background: #c62828; color: white; border-color: #c62828; font-size: 11px; padding: 4px 8px; }
+
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .filter-chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 0.5px solid var(--color-border-secondary, #ccc); background: transparent; color: var(--color-text-secondary, #555); transition: all 0.15s; }
+  .filter-chip.active { background: #1a2744; color: white; border-color: #1a2744; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; table-layout: fixed; }
+  th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--color-border-secondary, #ddd); font-size: 11px; font-weight: 500; color: var(--color-text-secondary, #666); background: var(--color-background-secondary, #fafafa); white-space: nowrap; }
+  td { padding: 8px 10px; border-bottom: 0.5px solid var(--color-border-tertiary, #eee); vertical-align: middle; }
+  tr:hover td { background: var(--color-background-secondary, #fafafa); }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .badge.baik { background: #e8f5e9; color: #2e7d32; }
+  .badge.rusak { background: #ffebee; color: #c62828; }
+  .badge.dipinjam { background: #fff8e1; color: #e65100; }
+  .badge.siap { background: #e3f2fd; color: #1565c0; }
+  .badge.kompi { background: #ede7f6; color: #4527a0; font-size: 10px; }
+
+  .kode-tag { font-family: var(--font-mono, monospace); font-size: 11px; background: var(--color-background-secondary, #f0f0f0); padding: 2px 6px; border-radius: 4px; color: var(--color-text-secondary, #555); }
+
+  .wa-panel { background: #0a1929; border-radius: 10px; padding: 16px; }
+  .wa-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 0.5px solid rgba(255,255,255,0.1); }
+  .wa-avatar { width: 36px; height: 36px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; }
+  .wa-name { color: white; font-size: 14px; font-weight: 500; }
+  .wa-status { color: #81c784; font-size: 11px; }
+
+  .chat-messages { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; max-height: 340px; overflow-y: auto; padding-right: 4px; }
+  .msg { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 13px; line-height: 1.5; }
+  .msg.user { background: #1b5e20; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+  .msg.bot { background: #1e3057; color: rgba(255,255,255,0.92); align-self: flex-start; border-bottom-left-radius: 2px; }
+  .msg.system { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5); align-self: center; font-size: 11px; border-radius: 6px; }
+  .msg-time { font-size: 10px; opacity: 0.55; margin-top: 3px; text-align: right; }
+
+  .wa-input-row { display: flex; gap: 8px; }
+  .wa-input { flex: 1; background: #1e3057; border: 0.5px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 9px 14px; color: white; font-size: 13px; font-family: inherit; }
+  .wa-input::placeholder { color: rgba(255,255,255,0.35); }
+  .wa-input:focus { outline: none; border-color: rgba(76,175,80,0.5); }
+  .wa-send { background: #4CAF50; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+
+  .quick-cmds { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .quick-cmd { padding: 4px 10px; border-radius: 14px; font-size: 11px; cursor: pointer; border: 0.5px solid rgba(76,175,80,0.4); color: #81c784; background: transparent; font-family: inherit; transition: all 0.15s; }
+  .quick-cmd:hover { background: rgba(76,175,80,0.15); }
+
+  .last-update { font-size: 10px; color: var(--color-text-secondary, #888); }
+  .edit-btn { font-size: 11px; padding: 3px 8px; cursor: pointer; border: 0.5px solid #ccc; border-radius: 4px; background: transparent; color: #555; }
+  .edit-btn:hover { background: #f0f0f0; }
+
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: var(--color-background-primary, white); border-radius: 12px; padding: 20px; max-width: 480px; width: 90%; }
+  .modal-title { font-size: 15px; font-weight: 500; margin-bottom: 14px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+  .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.5px; color: var(--color-text-secondary, #888); margin-bottom: 8px; text-transform: uppercase; }
+  .hidden { display: none; }
+  .col-kode { width: 90px; } .col-nama { width: 160px; } .col-kompi { width: 90px; }
+  .col-jml { width: 55px; } .col-baik { width: 50px; } .col-rusak { width: 55px; }
+  .col-pinjam { width: 60px; } .col-siap { width: 50px; } .col-kondisi { width: 70px; }
+  .col-upd { width: 90px; } .col-aksi { width: 60px; }
 </style>
 </head>
-
 <body>
 
 <div class="header">
-  <h2>📦 Yonkomlek Bot Data</h2>
+  <div class="header-logo">YK</div>
+  <div>
+    <div class="header-title">Yonkomlek Bot Data</div>
+    <div class="header-sub">Sistem Database Inventaris Satuan</div>
+  </div>
+  <div class="header-right">
+    <div style="text-align:right;">
+      <div style="font-size:11px;color:rgba(255,255,255,0.7);" id="tanggalHeader"></div>
+      <div style="font-size:10px;color:#81c784;">● Sistem Aktif</div>
+    </div>
+  </div>
 </div>
 
-<!-- STATS -->
-<div class="flex" id="stats"></div>
-
-<!-- FORM -->
-<div style="padding:10px;">
-  <select id="kompi">
-    <option>Kompi Markas</option>
-    <option>Kompi Komunikasi</option>
-    <option>Kompi Pernika</option>
-    <option>Kompi Bantuan</option>
-  </select>
-
-  <input id="nama" placeholder="Nama Barang">
-  <input id="jumlah" type="number" placeholder="Jumlah">
-  <input id="baik" type="number" placeholder="Baik">
-  <input id="rusak" type="number" placeholder="Rusak">
-  <input id="pinjam" type="number" placeholder="Dipinjam">
-  <input id="ket" placeholder="Keterangan">
-
-  <button onclick="tambah()">Simpan</button>
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('gudang')" id="tabGudang">Panel Gudang (Input)</div>
+  <div class="tab" onclick="switchTab('bot')" id="tabBot">WhatsApp Bot (Komandan)</div>
 </div>
 
-<!-- TABLE -->
-<table>
-<thead>
-<tr>
-  <th>Nama</th>
-  <th>Kompi</th>
-  <th>Jumlah</th>
-  <th>Rusak</th>
-  <th>Dipinjam</th>
-  <th>Siap</th>
-  <th>Aksi</th>
-</tr>
-</thead>
-<tbody id="tabel"></tbody>
-</table>
+<div class="main" id="viewGudang">
+
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="card">
+    <div class="card-title">Tambah / Update Data Barang</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Kompi</label>
+        <select id="formKompi">
+          <option value="KI-MAR">Kompi Markas</option>
+          <option value="KI-BAN">Kompi Bantuan</option>
+          <option value="KI-OPS">Kompi Sikoops</option>
+          <option value="KI-LEK">Kompi Sislek</option>
+          <option value="KI-NIK">Kompi Pernika</option>
+          <option value="KI-KOM">Kompi Komunikasi</option>
+          <option value="LOG">Barang Log</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Nama Barang</label>
+        <input type="text" id="formNama" placeholder="cth: Radio Jammer HF" />
+      </div>
+      <div class="form-group">
+        <label>Jumlah Total</label>
+        <input type="number" id="formJumlah" min="0" value="1" />
+      </div>
+      <div class="form-group">
+        <label>Kondisi Baik</label>
+        <input type="number" id="formBaik" min="0" value="1" />
+      </div>
+      <div class="form-group">
+        <label>Kondisi Rusak</label>
+        <input type="number" id="formRusak" min="0" value="0" />
+      </div>
+      <div class="form-group">
+        <label>Dipinjam</label>
+        <input type="number" id="formPinjam" min="0" value="0" />
+      </div>
+      <div class="form-group" style="grid-column:1 / -1;">
+        <label>Keterangan</label>
+        <input type="text" id="formKeterangan" placeholder="Contoh: Set A, Box 1, Lengkap" />
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn primary" onclick="tambahBarang()">Simpan Barang</button>
+      <button class="btn" onclick="resetForm()">Reset</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Data Inventaris Barang</div>
+    <div class="filter-bar" id="filterBar"></div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input type="text" id="searchInput" placeholder="Cari nama barang..." style="flex:1;padding:7px 12px;border:0.5px solid var(--color-border-secondary,#ccc);border-radius:6px;font-size:13px;background:var(--color-background-primary,white);color:var(--color-text-primary,#1a1a1a);" oninput="renderTable()" />
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-kode">Kode</th>
+            <th class="col-nama">Nama Barang</th>
+            <th class="col-kompi">Kompi</th>
+            <th class="col-jml">Total</th>
+            <th class="col-baik">Baik</th>
+            <th class="col-rusak">Rusak</th>
+            <th class="col-pinjam">Pinjam</th>
+            <th class="col-siap">Siap</th>
+            <th class="col-upd">Update</th>
+            <th class="col-ket">Keterangan</th>
+            <th class="col-aksi">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div style="font-size:12px;color:var(--color-text-secondary,#888);margin-top:10px;" id="tableInfo"></div>
+  </div>
+</div>
+
+<div class="main hidden" id="viewBot">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div>
+      <div class="section-label">Simulasi WhatsApp Bot</div>
+      <div class="wa-panel">
+        <div class="wa-header">
+          <div class="wa-avatar">YK</div>
+          <div>
+            <div class="wa-name">Yonkomlek Bot</div>
+            <div class="wa-status">online</div>
+          </div>
+        </div>
+        <div class="quick-cmds" id="quickCmds"></div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="wa-input-row">
+          <input class="wa-input" id="waInput" placeholder="Ketik pertanyaan..." onkeydown="if(event.key==='Enter')kirimPesan()" />
+          <button class="wa-send" onclick="kirimPesan()">➤</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">Panduan Perintah Bot</div>
+      <div class="card" style="font-size:12.5px;line-height:1.8;">
+        <div style="margin-bottom:10px;"><strong>Perintah Tersedia:</strong></div>
+        <div style="display:flex;flex-direction:column;gap:6px;" id="panduanList"></div>
+      </div>
+      <div class="card" style="margin-top:0;">
+        <div class="card-title">Rekap Per Kompi</div>
+        <div id="rekapKompi" style="font-size:12.5px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalEdit" class="hidden">
+  <div class="modal-overlay">
+    <div class="modal">
+      <div class="modal-title">Edit Data Barang</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nama Barang</label>
+          <input type="text" id="editNama" />
+        </div>
+        <div class="form-group">
+          <label>Jumlah Total</label>
+          <input type="number" id="editJumlah" />
+        </div>
+        <div class="form-group">
+          <label>Kondisi Baik</label>
+          <input type="number" id="editBaik" />
+        </div>
+        <div class="form-group">
+          <label>Kondisi Rusak</label>
+          <input type="number" id="editRusak" />
+        </div>
+        <div class="form-group">
+          <label>Dipinjam</label>
+          <input type="number" id="editPinjam" />
+        </div>
+        <div class="form-group" style="grid-column:1 / -1;">
+          <label>Keterangan</label>
+          <input type="text" id="editKeterangan" placeholder="Contoh: Set A, Box 1, Lengkap" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="tutupModal()">Batal</button>
+        <button class="btn primary" onclick="simpanEdit()">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-let data = [];
+const KOMPI_LIST = [
+  {kode:'KI-MAR',label:'Kompi Markas',warna:'#4527a0'},
+  {kode:'KI-BAN',label:'Kompi Bantuan',warna:'#1565c0'},
+  {kode:'KI-OPS',label:'Kompi Sikoops',warna:'#2e7d32'},
+  {kode:'KI-LEK',label:'Kompi Sislek',warna:'#e65100'},
+  {kode:'KI-NIK',label:'Kompi Pernika',warna:'#c62828'},
+  {kode:'KI-KOM',label:'Kompi Komunikasi',warna:'#00695c'},
+  {kode:'LOG',label:'Barang Log',warna:'#5d4037'},
+];
 
-function hitungSiap(x){
-  return x.jumlah - x.rusak - x.pinjam;
+let editingId = null;
+let filterAktif = 'SEMUA';
+let counter = {
+  'KI-MAR':0,'KI-BAN':0,'KI-OPS':0,'KI-LEK':0,'KI-NIK':0,'KI-KOM':0,'LOG':0
+};
+
+let data = [
+  {id:1,kode:'KI-KOM-001',kompi:'KI-KOM',nama:'Radio HF Jammer',jumlah:6,baik:4,rusak:1,pinjam:1,update:'2025-04-04',keterangan:''},
+  {id:2,kode:'KI-KOM-002',kompi:'KI-KOM',nama:'Radio VHF Manpack',jumlah:12,baik:10,rusak:2,pinjam:0,update:'2025-04-04',keterangan:''},
+  {id:3,kode:'KI-KOM-003',kompi:'KI-KOM',nama:'Antena Directional',jumlah:4,baik:3,rusak:1,pinjam:0,update:'2025-04-03',keterangan:''},
+  {id:4,kode:'KI-NIK-001',kompi:'KI-NIK',nama:'Crypto Box CX-52',jumlah:3,baik:3,rusak:0,pinjam:0,update:'2025-04-04',keterangan:''},
+  {id:5,kode:'KI-NIK-002',kompi:'KI-NIK',nama:'Fax Secure Unit',jumlah:2,baik:1,rusak:1,pinjam:0,update:'2025-04-02',keterangan:''},
+  {id:6,kode:'KI-OPS-001',kompi:'KI-OPS',nama:'Laptop Ops Taktis',jumlah:5,baik:4,rusak:0,pinjam:1,update:'2025-04-04',keterangan:''},
+  {id:7,kode:'KI-OPS-002',kompi:'KI-OPS',nama:'GPS Handheld',jumlah:8,baik:7,rusak:1,pinjam:0,update:'2025-04-04',keterangan:''},
+  {id:8,kode:'KI-LEK-001',kompi:'KI-LEK',nama:'Drone Recon Mini',jumlah:3,baik:2,rusak:1,pinjam:0,update:'2025-04-03',keterangan:''},
+  {id:9,kode:'KI-LEK-002',kompi:'KI-LEK',nama:'Sensor Elektronik',jumlah:10,baik:8,rusak:2,pinjam:0,update:'2025-04-04',keterangan:''},
+  {id:10,kode:'KI-MAR-001',kompi:'KI-MAR',nama:'Meja Komando Lipat',jumlah:4,baik:4,rusak:0,pinjam:0,update:'2025-04-01',keterangan:''},
+  {id:11,kode:'KI-BAN-001',kompi:'KI-BAN',nama:'Generator 5KVA',jumlah:2,baik:2,rusak:0,pinjam:0,update:'2025-04-04',keterangan:''},
+  {id:12,kode:'LOG-001',kompi:'LOG',nama:'Kabel Coax 50m',jumlah:20,baik:18,rusak:2,pinjam:0,update:'2025-04-02',keterangan:''},
+];
+
+counter = {'KI-MAR':1,'KI-BAN':1,'KI-OPS':2,'KI-LEK':2,'KI-NIK':2,'KI-KOM':3,'LOG':1};
+
+function getKompiLabel(kode){
+  const k = KOMPI_LIST.find(x=>x.kode===kode);
+  return k ? k.label : kode;
+}
+function getKompiWarna(kode){
+  const k = KOMPI_LIST.find(x=>x.kode===kode);
+  return k ? k.warna : '#555';
+}
+function getSiapOps(item){
+  return Math.max(0, item.jumlah - item.rusak - item.pinjam);
+}
+function formatTgl(str){
+  if(!str) return '-';
+  const d = new Date(str);
+  return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'2-digit'});
+}
+function now(){
+  return new Date().toISOString().slice(0,10);
 }
 
-async function load(){
-  let res = await fetch('/api/data');
-  data = await res.json();
-  render();
-}
-
-function render(){
-  let t = document.getElementById('tabel');
-  t.innerHTML = '';
-
-  let total=0, baik=0, rusak=0, pinjam=0, siap=0;
-
-  data.forEach((x,i)=>{
-    let s = hitungSiap(x);
-
-    total += x.jumlah;
-    baik += x.baik;
-    rusak += x.rusak;
-    pinjam += x.pinjam;
-    siap += s;
-
-    t.innerHTML += `
-    <tr>
-      <td>${x.nama}</td>
-      <td>${x.kompi}</td>
-      <td>${x.jumlah}</td>
-      <td>${x.rusak}</td>
-      <td>${x.pinjam}</td>
-      <td>${s}</td>
-      <td>
-        <button onclick="hapus(${i})">Hapus</button>
-      </td>
-    </tr>`;
-  });
-
-  document.getElementById('stats').innerHTML = `
-    <div class="card">Total Unit<br>${total}</div>
-    <div class="card">Baik<br>${baik}</div>
-    <div class="card">Rusak<br>${rusak}</div>
-    <div class="card">Dipinjam<br>${pinjam}</div>
-    <div class="card">Siap<br>${siap}</div>
+function renderStats(){
+  const total = data.reduce((s,x)=>s+x.jumlah,0);
+  const baik = data.reduce((s,x)=>s+x.baik,0);
+  const rusak = data.reduce((s,x)=>s+x.rusak,0);
+  const pinjam = data.reduce((s,x)=>s+x.pinjam,0);
+  const siap = data.reduce((s,x)=>s+getSiapOps(x),0);
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Item</div><div class="stat-value blue">${data.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Unit</div><div class="stat-value">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Kondisi Baik</div><div class="stat-value green">${baik}</div></div>
+    <div class="stat-card"><div class="stat-label">Rusak</div><div class="stat-value red">${rusak}</div></div>
+    <div class="stat-card"><div class="stat-label">Dipinjam</div><div class="stat-value amber">${pinjam}</div></div>
+    <div class="stat-card"><div class="stat-label">Siap Ops</div><div class="stat-value green">${siap}</div></div>
   `;
 }
 
-async function tambah(){
-  let obj = {
-    kompi: document.getElementById('kompi').value,
-    nama: document.getElementById('nama').value,
-    jumlah: Number(document.getElementById('jumlah').value),
-    baik: Number(document.getElementById('baik').value),
-    rusak: Number(document.getElementById('rusak').value),
-    pinjam: Number(document.getElementById('pinjam').value),
-    keterangan: document.getElementById('ket').value
-  };
-
-  data.push(obj);
-  await simpan();
-}
-
-async function hapus(i){
-  data.splice(i,1);
-  await simpan();
-}
-
-async function simpan(){
-  await fetch('/api/data',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(data)
+function renderFilterBar(){
+  const fb = document.getElementById('filterBar');
+  fb.innerHTML = `<button class="filter-chip ${filterAktif==='SEMUA'?'active':''}" onclick="setFilter('SEMUA')">Semua</button>`;
+  KOMPI_LIST.forEach(k=>{
+    const cnt = data.filter(x=>x.kompi===k.kode).length;
+    if(cnt>0) fb.innerHTML += `<button class="filter-chip ${filterAktif===k.kode?'active':''}" onclick="setFilter('${k.kode}')">${k.label} (${cnt})</button>`;
   });
+}
+function setFilter(k){ filterAktif=k; renderFilterBar(); renderTable(); }
 
-  load();
+function formatKeterangan(val){
+  if(!val || !val.trim()) return '<span class="ket-empty">-</span>';
+  const items = val
+    .split(/\n|,/)
+    .map(x=>x.trim())
+    .filter(Boolean);
+  if(!items.length) return '<span class="ket-empty">-</span>';
+  return `<div class="ket-wrap">${items.map(x=>`<span class="ket-badge">${x}</span>`).join('')}</div>`;
 }
 
-load();
-</script>
+function renderTable(){
+  const q = (document.getElementById('searchInput').value||'').toLowerCase();
+  let rows = data.filter(x=>{
+    if(filterAktif!=='SEMUA' && x.kompi!==filterAktif) return false;
+    if(q && !x.nama.toLowerCase().includes(q) && !x.kode.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const tb = document.getElementById('tableBody');
+  if(!rows.length){
+    tb.innerHTML = `<tr><td colspan="11" style="text-align:center;color:var(--color-text-secondary,#888);padding:20px;">Tidak ada data</td></tr>`;
+    document.getElementById('tableInfo').textContent = '';
+    return;
+  }
+  tb.innerHTML = rows.map(x=>{
+    const siap = getSiapOps(x);
+    const warna = getKompiWarna(x.kompi);
+    return `<tr>
+      <td><span class="kode-tag">${x.kode}</span></td>
+      <td style="font-weight:500;">${x.nama}</td>
+      <td><span class="badge kompi" style="background:${warna}22;color:${warna}">${getKompiLabel(x.kompi).replace('Kompi ','')}</span></td>
+      <td style="text-align:center;">${x.jumlah}</td>
+      <td style="text-align:center;"><span style="color:#2e7d32;font-weight:500;">${x.baik}</span></td>
+      <td style="text-align:center;"><span style="color:#c62828;font-weight:500;">${x.rusak}</span></td>
+      <td style="text-align:center;"><span style="color:#e65100;font-weight:500;">${x.pinjam}</span></td>
+      <td style="text-align:center;"><span class="badge siap">${siap}</span></td>
+      <td><span class="last-update">${formatTgl(x.update)}</span></td>
+      <td>${formatKeterangan(x.keterangan||"")}</td>
+      <td><button class="edit-btn" onclick="bukaEdit(${x.id})">Edit</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tableInfo').textContent = `Menampilkan ${rows.length} dari ${data.length} item`;
+}
 
+function tambahBarang(){
+  const kompi = document.getElementById('formKompi').value;
+  const nama = document.getElementById('formNama').value.trim();
+  const jumlah = parseInt(document.getElementById('formJumlah').value)||0;
+  const baik = parseInt(document.getElementById('formBaik').value)||0;
+  const rusak = parseInt(document.getElementById('formRusak').value)||0;
+  const pinjam = parseInt(document.getElementById('formPinjam').value)||0;
+  const keterangan = document.getElementById('formKeterangan').value.trim();
+  if(!nama){ alert('Nama barang harus diisi'); return; }
+  counter[kompi] = (counter[kompi]||0)+1;
+  const nomor = String(counter[kompi]).padStart(3,'0');
+  const kode = `${kompi}-${nomor}`;
+  const newId = Math.max(0,...data.map(x=>x.id))+1;
+  data.push({id:newId,kode,kompi,nama,jumlah,baik,rusak,pinjam,keterangan,update:now()});
+  renderAll();
+  resetForm();
+}
+function resetForm(){
+  document.getElementById('formNama').value='';
+  document.getElementById('formJumlah').value=1;
+  document.getElementById('formBaik').value=1;
+  document.getElementById('formRusak').value=0;
+  document.getElementById('formPinjam').value=0;
+  document.getElementById('formKeterangan').value='';
+}
+
+function bukaEdit(id){
+  editingId = id;
+  const x = data.find(d=>d.id===id);
+  if(!x) return;
+  document.getElementById('editNama').value=x.nama;
+  document.getElementById('editJumlah').value=x.jumlah;
+  document.getElementById('editBaik').value=x.baik;
+  document.getElementById('editRusak').value=x.rusak;
+  document.getElementById('editPinjam').value=x.pinjam;
+  document.getElementById('editKeterangan').value=x.keterangan||'';
+  document.getElementById('modalEdit').classList.remove('hidden');
+}
+function tutupModal(){ document.getElementById('modalEdit').classList.add('hidden'); editingId=null; }
+function simpanEdit(){
+  const x = data.find(d=>d.id===editingId);
+  if(!x) return;
+  x.nama = document.getElementById('editNama').value.trim()||x.nama;
+  x.jumlah = parseInt(document.getElementById('editJumlah').value)||0;
+  x.baik = parseInt(document.getElementById('editBaik').value)||0;
+  x.rusak = parseInt(document.getElementById('editRusak').value)||0;
+  x.pinjam = parseInt(document.getElementById('editPinjam').value)||0;
+  x.keterangan = document.getElementById('editKeterangan').value.trim();
+  x.update = now();
+  tutupModal();
+  renderAll();
+}
+
+function renderAll(){
+  renderStats(); renderFilterBar(); renderTable(); renderRekapKompi();
+}
+
+// ========== BOT WA ==========
+const chatHistory = [];
+
+const QUICK = [
+  'Jammer tersedia berapa?',
+  'Rekap semua kompi',
+  'Barang rusak',
+  'Status siap ops',
+  'Update terakhir',
+];
+
+function renderQuickCmds(){
+  document.getElementById('quickCmds').innerHTML = QUICK.map(q=>
+    `<button class="quick-cmd" onclick="kirimQ('${q}')">${q}</button>`
+  ).join('');
+}
+
+function kirimQ(txt){ document.getElementById('waInput').value=txt; kirimPesan(); }
+
+function kirimPesan(){
+  const inp = document.getElementById('waInput');
+  const txt = inp.value.trim();
+  if(!txt) return;
+  inp.value='';
+  addMsg(txt,'user');
+  setTimeout(()=>{
+    const resp = botReply(txt);
+    addMsg(resp,'bot');
+  }, 400);
+}
+
+function addMsg(txt,who){
+  const cm = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  d.className = `msg ${who}`;
+  const now2 = new Date();
+  const time = now2.getHours().toString().padStart(2,'0')+':'+now2.getMinutes().toString().padStart(2,'0');
+  d.innerHTML = txt.replace(/\n/g,'<br>') + `<div class="msg-time">${time}</div>`;
+  cm.appendChild(d);
+  cm.scrollTop = cm.scrollHeight;
+}
+
+function botReply(q){
+  const ql = q.toLowerCase();
+
+  // Rekap semua
+  if(ql.includes('rekap') || ql.includes('semua') || ql.includes('total')){
+    const total = data.reduce((s,x)=>s+x.jumlah,0);
+    const baik = data.reduce((s,x)=>s+x.baik,0);
+    const rusak = data.reduce((s,x)=>s+x.rusak,0);
+    const siap = data.reduce((s,x)=>s+getSiapOps(x),0);
+    return `📊 *REKAP INVENTARIS YONKOMLEK*\n━━━━━━━━━━━━━━\nTotal Item: ${data.length} jenis\nTotal Unit: ${total} pcs\n✅ Kondisi Baik: ${baik}\n❌ Rusak: ${rusak}\n⚡ Siap Ops: ${siap}\n\nKetik nama kompi untuk detail.`;
+  }
+
+  // Barang rusak
+  if(ql.includes('rusak')){
+    const rusaks = data.filter(x=>x.rusak>0);
+    if(!rusaks.length) return '✅ Tidak ada barang rusak saat ini.';
+    return '🔴 *BARANG RUSAK:*\n' + rusaks.map(x=>`• ${x.nama} (${x.kode}): ${x.rusak} unit rusak`).join('\n');
+  }
+
+  // Status siap ops
+  if(ql.includes('siap') || ql.includes('ops')){
+    const rendah = data.filter(x=>getSiapOps(x)===0);
+    const resp = data.map(x=>`• ${x.nama}: ${getSiapOps(x)} siap ops`).slice(0,6).join('\n');
+    const warn = rendah.length ? `\n⚠️ ${rendah.length} item TIDAK siap ops!` : '';
+    return `⚡ *STATUS SIAP OPS:*\n${resp}${warn}`;
+  }
+
+  // Update terakhir
+  if(ql.includes('update') || ql.includes('terakhir')){
+    const sorted = [...data].sort((a,b)=>b.update.localeCompare(a.update)).slice(0,5);
+    return '🕐 *UPDATE TERAKHIR:*\n' + sorted.map(x=>`• ${x.nama}: ${formatTgl(x.update)}`).join('\n');
+  }
+
+  // Dipinjam
+  if(ql.includes('pinjam') || ql.includes('dipinjam')){
+    const pinj = data.filter(x=>x.pinjam>0);
+    if(!pinj.length) return '✅ Tidak ada barang dipinjam saat ini.';
+    return '🟡 *BARANG DIPINJAM:*\n' + pinj.map(x=>`• ${x.nama} (${x.kode}): ${x.pinjam} unit`).join('\n');
+  }
+
+  // Cek nama barang spesifik
+  const match = data.filter(x=>x.nama.toLowerCase().includes(ql) || x.kode.toLowerCase().includes(ql));
+  if(match.length){
+    return match.map(x=>`📦 *${x.nama}*\nKode: ${x.kode}\nKompi: ${getKompiLabel(x.kompi)}\nTotal: ${x.jumlah} | Baik: ${x.baik} | Rusak: ${x.rusak}\nDipinjam: ${x.pinjam} | Siap Ops: ${getSiapOps(x)}\nUpdate: ${formatTgl(x.update)}`).join('\n\n');
+  }
+
+  // Kompi spesifik
+  const kompiMatch = KOMPI_LIST.find(k=>ql.includes(k.label.toLowerCase().replace('kompi ','')) || ql.includes(k.kode.toLowerCase()));
+  if(kompiMatch){
+    const items = data.filter(x=>x.kompi===kompiMatch.kode);
+    if(!items.length) return `Tidak ada data untuk ${kompiMatch.label}.`;
+    const siapTotal = items.reduce((s,x)=>s+getSiapOps(x),0);
+    return `🪖 *${kompiMatch.label.toUpperCase()}*\nTotal: ${items.length} jenis | Siap Ops: ${siapTotal} unit\n\n` +
+      items.map(x=>`• ${x.nama}: ${getSiapOps(x)} siap / ${x.jumlah} total`).join('\n');
+  }
+
+  return `❓ Perintah tidak dikenali.\nCoba:\n• "jammer tersedia"\n• "rekap semua"\n• "barang rusak"\n• "kompi komunikasi"\n• nama barang spesifik`;
+}
+
+function renderPanduan(){
+  const cmds = [
+    {cmd:'[nama barang]',desc:'Cek stok barang tertentu, contoh: "jammer"'},
+    {cmd:'rekap semua',desc:'Tampilkan ringkasan seluruh inventaris'},
+    {cmd:'barang rusak',desc:'Daftar semua barang dengan kondisi rusak'},
+    {cmd:'siap ops',desc:'Status barang yang siap operasional'},
+    {cmd:'dipinjam',desc:'Daftar barang sedang dipinjam'},
+    {cmd:'update terakhir',desc:'Kapan terakhir data diperbarui'},
+    {cmd:'kompi komunikasi',desc:'Rekap barang per kompi'},
+  ];
+  document.getElementById('panduanList').innerHTML = cmds.map(c=>
+    `<div style="padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary,#eee);">
+      <span style="font-family:var(--font-mono,monospace);font-size:11px;background:var(--color-background-secondary,#f0f0f0);padding:2px 6px;border-radius:4px;color:#1565c0;">${c.cmd}</span>
+      <span style="color:var(--color-text-secondary,#666);margin-left:6px;font-size:12px;">${c.desc}</span>
+    </div>`
+  ).join('');
+}
+
+function renderRekapKompi(){
+  const el = document.getElementById('rekapKompi');
+  if(!el) return;
+  el.innerHTML = KOMPI_LIST.map(k=>{
+    const items = data.filter(x=>x.kompi===k.kode);
+    if(!items.length) return '';
+    const siap = items.reduce((s,x)=>s+getSiapOps(x),0);
+    const rusak = items.reduce((s,x)=>s+x.rusak,0);
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary,#eee);">
+      <span style="font-size:12px;color:${k.warna};font-weight:500;">${k.label}</span>
+      <span style="font-size:12px;color:var(--color-text-secondary,#666);">${items.length} item · <span style="color:#2e7d32;">${siap} siap</span>${rusak?` · <span style="color:#c62828;">${rusak} rusak</span>`:''}</span>
+    </div>`;
+  }).join('');
+}
+
+function switchTab(t){
+  document.getElementById('viewGudang').classList.toggle('hidden', t!=='gudang');
+  document.getElementById('viewBot').classList.toggle('hidden', t!=='bot');
+  document.getElementById('tabGudang').classList.toggle('active', t==='gudang');
+  document.getElementById('tabBot').classList.toggle('active', t!=='gudang');
+  if(t==='bot'){ renderRekapKompi(); renderQuickCmds(); }
+}
+
+// Init
+const tgl = new Date();
+document.getElementById('tanggalHeader').textContent = tgl.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+renderAll();
+renderPanduan();
+addMsg('Selamat datang di Yonkomlek Bot Data 🪖\nSilakan ketik pertanyaan atau pilih perintah cepat di atas.','bot');
+</script>
 </body>
 </html>
