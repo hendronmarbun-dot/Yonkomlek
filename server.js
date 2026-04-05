@@ -57,9 +57,24 @@ function jawabanBot(pesan) {
   const data = db.items || [];
 
   if (!q) {
-    return 'Kirim perintah seperti: rekap semua, barang rusak, barang dipinjam, atau nama barang.';
+    return 'Kirim perintah seperti: rekap semua, barang rusak, barang dipinjam, siap ops, atau nama barang.';
   }
 
+  const formatItemDetail = (x) => {
+    return (
+      `📦 ${x.nama || '-'}\n` +
+      `Kode: ${x.kode || '-'}\n` +
+      `Kompi: ${x.kompi || '-'}\n` +
+      `Jumlah: ${x.jumlah || 0}\n` +
+      `Baik: ${x.baik || 0}\n` +
+      `Rusak: ${x.rusak || 0}\n` +
+      `Dipinjam: ${x.pinjam || 0}\n` +
+      `Siap: ${getSiap(x)}\n` +
+      `Keterangan: ${x.keterangan || '-'}`
+    );
+  };
+
+  // ================= REKAP SEMUA =================
   if (q.includes('rekap') || q.includes('semua')) {
     const total = data.reduce((s, x) => s + (x.jumlah || 0), 0);
     const baik = data.reduce((s, x) => s + (x.baik || 0), 0);
@@ -78,43 +93,98 @@ function jawabanBot(pesan) {
     );
   }
 
-  if (q.includes('rusak')) {
+  // ================= BARANG RUSAK =================
+  if (q.includes('rusak') && !q.includes('kursi') && !q.includes('radio')) {
     const rusaks = data.filter(x => (x.rusak || 0) > 0);
     if (!rusaks.length) return 'Tidak ada barang rusak.';
 
-    return 'Barang rusak:\n' + rusaks.map(x =>
-      `- ${x.nama}: ${x.rusak}`
-    ).join('\n');
+    return '🔴 BARANG RUSAK:\n\n' + rusaks.map(formatItemDetail).join('\n\n');
   }
 
+  // ================= BARANG DIPINJAM =================
   if (q.includes('pinjam') || q.includes('dipinjam')) {
     const pinjams = data.filter(x => (x.pinjam || 0) > 0);
     if (!pinjams.length) return 'Tidak ada barang dipinjam.';
 
-    return 'Barang dipinjam:\n' + pinjams.map(x =>
-      `- ${x.nama}: ${x.pinjam}`
-    ).join('\n');
+    return '🟡 BARANG DIPINJAM:\n\n' + pinjams.map(formatItemDetail).join('\n\n');
   }
 
+  // ================= SIAP OPS =================
+  if (q.includes('siap')) {
+    const items = data
+      .filter(x => getSiap(x) > 0)
+      .sort((a, b) => getSiap(b) - getSiap(a));
+
+    if (!items.length) return 'Tidak ada barang siap ops.';
+
+    return '🟢 BARANG SIAP OPS:\n\n' + items.map(formatItemDetail).join('\n\n');
+  }
+
+  // ================= FILTER KOMPI =================
+  const daftarKompi = ['ki-kom', 'ki-mar', 'ki-ban', 'ki-ops', 'ki-lek', 'ki-nik', 'log'];
+  const kompiCari = daftarKompi.find(k => q.includes(k));
+
+  if (kompiCari) {
+    const itemsKompi = data.filter(x => String(x.kompi || '').toLowerCase() === kompiCari);
+
+    if (!itemsKompi.length) {
+      return `Tidak ada data untuk kompi ${kompiCari.toUpperCase()}.`;
+    }
+
+    return `📁 DATA ${kompiCari.toUpperCase()}\n\n` + itemsKompi.map(formatItemDetail).join('\n\n');
+  }
+
+  // ================= PENCARIAN DETAIL NAMA/KODE/KETERANGAN =================
   const match = data.filter(x =>
     String(x.nama || '').toLowerCase().includes(q) ||
     String(x.kode || '').toLowerCase().includes(q) ||
-    String(x.kompi || '').toLowerCase().includes(q)
+    String(x.kompi || '').toLowerCase().includes(q) ||
+    String(x.keterangan || '').toLowerCase().includes(q)
   );
 
-  if (match.length) {
-    return match.map(x =>
-      `${x.nama}\n` +
-      `Kompi: ${x.kompi || '-'}\n` +
-      `Total: ${x.jumlah || 0}\n` +
-      `Rusak: ${x.rusak || 0}\n` +
-      `Dipinjam: ${x.pinjam || 0}\n` +
-      `Siap: ${getSiap(x)}\n` +
-      `Keterangan: ${x.keterangan || '-'}`
-    ).join('\n\n');
+  if (match.length === 1) {
+    return formatItemDetail(match[0]);
   }
 
-  return 'Perintah tidak dikenali.\nCoba: rekap semua, barang rusak, barang dipinjam, atau nama barang.';
+  if (match.length > 1) {
+    return `📋 DITEMUKAN ${match.length} DATA:\n\n` + match.map(formatItemDetail).join('\n\n');
+  }
+
+  // ================= KATA KUNCI PERNIKA / KOMUNIKASI / DLL =================
+  const aliasKompi = {
+    'pernika': 'ki-nik',
+    'komunikasi': 'ki-kom',
+    'markas': 'ki-mar',
+    'bantuan': 'ki-ban',
+    'sikoops': 'ki-ops',
+    'sislek': 'ki-lek'
+  };
+
+  for (const key in aliasKompi) {
+    if (q.includes(key)) {
+      const kodeKompi = aliasKompi[key];
+      const items = data.filter(x => String(x.kompi || '').toLowerCase() === kodeKompi);
+
+      if (!items.length) {
+        return `Tidak ada data untuk ${key}.`;
+      }
+
+      return `📁 DATA ${key.toUpperCase()}\n\n` + items.map(formatItemDetail).join('\n\n');
+    }
+  }
+
+  return (
+    'Perintah tidak dikenali.\n\n' +
+    'Contoh:\n' +
+    '- rekap semua\n' +
+    '- barang rusak\n' +
+    '- barang dipinjam\n' +
+    '- siap ops\n' +
+    '- kursi\n' +
+    '- radio\n' +
+    '- pernika\n' +
+    '- ki-kom'
+  );
 }
 
 // ================= LOGIN PAGE =================
