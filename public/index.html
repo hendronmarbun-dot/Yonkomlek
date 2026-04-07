@@ -1151,7 +1151,7 @@ async function callAI(userMsg, dbCtx){
 ${dbCtx}`;
   const resp=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+   headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01'},
     body:JSON.stringify({
       model:'claude-sonnet-4-20250514',
       max_tokens:1000,
