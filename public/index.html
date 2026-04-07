@@ -1,285 +1,538 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yonkomlek Bot Data</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font-sans, 'Segoe UI', sans-serif); background: var(--color-background-tertiary, #f5f5f0); color: var(--color-text-primary, #1a1a1a); min-height: 100vh; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f0f2f5;color:#1a1a1a;min-height:100vh}
 
-  .header { background: #1a2744; color: white; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
-  .header-logo { width: 36px; height: 36px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: white; flex-shrink: 0; }
-  .header-title { font-size: 16px; font-weight: 500; }
-  .header-sub { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 1px; }
-  .header-right { margin-left: auto; display: flex; gap: 8px; }
+/* ===== AUTH SCREEN ===== */
+.auth-screen{position:fixed;inset:0;background:#1a2744;display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.auth-box{background:#fff;border-radius:16px;padding:32px 28px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.auth-logo{width:52px;height:52px;background:#4CAF50;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff;margin:0 auto 12px}
+.auth-title{text-align:center;font-size:20px;font-weight:700;color:#1a2744;margin-bottom:4px}
+.auth-sub{text-align:center;font-size:12px;color:#888;margin-bottom:24px}
+.auth-tabs{display:flex;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;margin-bottom:20px}
+.auth-tab{flex:1;padding:9px;text-align:center;font-size:13px;cursor:pointer;background:#f5f5f5;color:#666;transition:.2s}
+.auth-tab.active{background:#1a2744;color:#fff}
+.auth-form{display:flex;flex-direction:column;gap:12px}
+.auth-input{padding:10px 14px;border:1px solid #d0d0d0;border-radius:8px;font-size:14px;font-family:inherit;outline:none;transition:.2s}
+.auth-input:focus{border-color:#1565c0;box-shadow:0 0 0 3px rgba(21,101,192,.1)}
+.auth-btn{padding:11px;background:#1a2744;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}
+.auth-btn:hover{background:#243563}
+.auth-btn.secondary{background:#f5f5f5;color:#333;border:1px solid #ddd}
+.auth-err{font-size:12px;color:#c62828;text-align:center;padding:8px;background:#ffebee;border-radius:6px}
+.auth-ok{font-size:12px;color:#2e7d32;text-align:center;padding:8px;background:#e8f5e9;border-radius:6px}
+.pending-msg{text-align:center;padding:20px;color:#e65100;font-size:14px}
 
-  .tab-bar { background: #1e3057; display: flex; }
-  .tab { padding: 10px 20px; font-size: 13px; cursor: pointer; color: rgba(255,255,255,0.6); border-bottom: 2px solid transparent; transition: all 0.2s; }
-  .tab.active { color: white; border-bottom-color: #4CAF50; }
-  .tab:hover { color: rgba(255,255,255,0.9); }
+/* ===== LAYOUT ===== */
+.app-wrap{display:none;flex-direction:column;min-height:100vh}
+.header{background:#1a2744;color:#fff;padding:11px 18px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.header-logo{width:36px;height:36px;background:#4CAF50;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:10px;color:rgba(255,255,255,.6);margin-top:1px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.user-chip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border-radius:20px;padding:4px 12px 4px 6px;font-size:12px;cursor:pointer;transition:.2s;position:relative}
+.user-chip:hover{background:rgba(255,255,255,.18)}
+.user-avatar{width:24px;height:24px;border-radius:50%;background:#4CAF50;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.role-badge{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:700;text-transform:uppercase}
+.role-master{background:#ffd700;color:#1a1a1a}
+.role-admin{background:#4CAF50;color:#fff}
+.role-user{background:rgba(255,255,255,.3);color:#fff}
+.notif-bell{position:relative;cursor:pointer;padding:4px;color:rgba(255,255,255,.8)}
+.notif-dot{position:absolute;top:2px;right:2px;width:8px;height:8px;background:#f44336;border-radius:50%;border:1.5px solid #1a2744}
 
-  .main { padding: 16px; max-width: 1100px; margin: 0 auto; }
+.tab-bar{background:#1e3057;display:flex;overflow-x:auto}
+.tab{padding:10px 18px;font-size:13px;cursor:pointer;color:rgba(255,255,255,.55);border-bottom:2px solid transparent;transition:.2s;white-space:nowrap;flex-shrink:0}
+.tab.active{color:#fff;border-bottom-color:#4CAF50}
+.tab:hover{color:rgba(255,255,255,.9)}
 
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
-  .stat-card { background: var(--color-background-primary, white); border-radius: 8px; border: 0.5px solid var(--color-border-tertiary, #e0e0e0); padding: 12px 14px; }
-  .stat-label { font-size: 11px; color: var(--color-text-secondary, #666); margin-bottom: 4px; }
-  .stat-value { font-size: 22px; font-weight: 500; }
-  .stat-value.green { color: #2e7d32; }
-  .stat-value.red { color: #c62828; }
-  .stat-value.amber { color: #e65100; }
-  .stat-value.blue { color: #1565c0; }
+.main{padding:14px;max-width:1200px;margin:0 auto;width:100%}
 
-  .card { background: var(--color-background-primary, white); border-radius: 10px; border: 0.5px solid var(--color-border-tertiary, #e0e0e0); padding: 16px; margin-bottom: 14px; }
-  .card-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary, #555); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 0.5px solid var(--color-border-tertiary, #eee); display: flex; align-items: center; gap: 8px; }
-  .card-title .kompiBadge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+/* ===== CARDS & STATS ===== */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.stat-card{background:#fff;border-radius:8px;border:1px solid #e8e8e8;padding:11px 14px}
+.stat-label{font-size:11px;color:#888;margin-bottom:3px}
+.stat-value{font-size:22px;font-weight:600}
+.green{color:#2e7d32}.red{color:#c62828}.amber{color:#e65100}.blue{color:#1565c0}.purple{color:#6a1b9a}
 
-  .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 12px; }
-  .form-group { display: flex; flex-direction: column; gap: 4px; }
-  .form-group label { font-size: 11px; color: var(--color-text-secondary, #666); }
-  .form-group input, .form-group select { font-size: 13px; padding: 7px 10px; border: 0.5px solid var(--color-border-secondary, #ccc); border-radius: 6px; background: var(--color-background-primary, white); color: var(--color-text-primary, #1a1a1a); }
-  .form-group input:focus, .form-group select:focus { outline: none; border-color: #1565c0; box-shadow: 0 0 0 2px rgba(21,101,192,0.15); }
+.card{background:#fff;border-radius:10px;border:1px solid #e8e8e8;padding:16px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:600;color:#555;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;gap:8px}
 
-  .btn { padding: 8px 16px; border-radius: 6px; border: 0.5px solid var(--color-border-secondary, #ccc); font-size: 13px; cursor: pointer; font-family: inherit; background: var(--color-background-primary, white); color: var(--color-text-primary, #1a1a1a); transition: all 0.15s; }
-  .btn:hover { background: var(--color-background-secondary, #f5f5f5); }
-  .btn.primary { background: #1a2744; color: white; border-color: #1a2744; }
-  .btn.primary:hover { background: #243563; }
-  .btn.success { background: #2e7d32; color: white; border-color: #2e7d32; }
-  .btn.danger-btn { background: #c62828; color: white; border-color: #c62828; font-size: 11px; padding: 4px 8px; }
+/* ===== FORMS ===== */
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:11px;font-weight:500;color:#666}
+.form-group input,.form-group select,.form-group textarea{font-size:13px;padding:7px 10px;border:1px solid #d0d0d0;border-radius:6px;background:#fff;color:#1a1a1a;font-family:inherit;transition:.2s}
+.form-group textarea{resize:vertical;min-height:70px;line-height:1.5}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#1565c0;box-shadow:0 0 0 2px rgba(21,101,192,.1)}
 
-  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-  .filter-chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 0.5px solid var(--color-border-secondary, #ccc); background: transparent; color: var(--color-text-secondary, #555); transition: all 0.15s; }
-  .filter-chip.active { background: #1a2744; color: white; border-color: #1a2744; }
+/* ===== BUTTONS ===== */
+.btn{padding:8px 15px;border-radius:6px;border:1px solid #ccc;font-size:13px;cursor:pointer;font-family:inherit;background:#fff;color:#333;transition:.15s;white-space:nowrap}
+.btn:hover{background:#f5f5f5}
+.btn.primary{background:#1a2744;color:#fff;border-color:#1a2744}
+.btn.primary:hover{background:#243563}
+.btn.success{background:#2e7d32;color:#fff;border-color:#2e7d32}
+.btn.danger{background:#c62828;color:#fff;border-color:#c62828}
+.btn.sm{padding:4px 9px;font-size:11px}
 
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 12.5px; table-layout: fixed; }
-  th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--color-border-secondary, #ddd); font-size: 11px; font-weight: 500; color: var(--color-text-secondary, #666); background: var(--color-background-secondary, #fafafa); white-space: nowrap; }
-  td { padding: 8px 10px; border-bottom: 0.5px solid var(--color-border-tertiary, #eee); vertical-align: middle; }
-  tr:hover td { background: var(--color-background-secondary, #fafafa); }
+/* ===== FILTER BAR ===== */
+.filter-bar{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.filter-chip{padding:4px 11px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid #ccc;background:transparent;color:#555;transition:.15s;white-space:nowrap}
+.filter-chip.active{background:#1a2744;color:#fff;border-color:#1a2744}
 
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-  .badge.baik { background: #e8f5e9; color: #2e7d32; }
-  .badge.rusak { background: #ffebee; color: #c62828; }
-  .badge.dipinjam { background: #fff8e1; color: #e65100; }
-  .badge.siap { background: #e3f2fd; color: #1565c0; }
-  .badge.kompi { background: #ede7f6; color: #4527a0; font-size: 10px; }
+/* ===== TABLE ===== */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:600px}
+th{text-align:left;padding:8px 9px;border-bottom:2px solid #e0e0e0;font-size:11px;font-weight:600;color:#666;background:#fafafa;white-space:nowrap;position:sticky;top:0}
+td{padding:8px 9px;border-bottom:1px solid #f0f0f0;vertical-align:top;word-break:break-word}
+tr:hover td{background:#fafafa}
 
-  .kode-tag { font-family: var(--font-mono, monospace); font-size: 11px; background: var(--color-background-secondary, #f0f0f0); padding: 2px 6px; border-radius: 4px; color: var(--color-text-secondary, #555); }
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500}
+.kode-tag{font-family:monospace;font-size:11px;background:#f0f0f0;padding:2px 6px;border-radius:4px;color:#555;white-space:nowrap}
+.ket-wrap{display:flex;flex-wrap:wrap;gap:3px;max-width:180px}
+.ket-badge{font-size:11px;background:#e8f0fe;color:#1a56db;padding:1px 6px;border-radius:3px;white-space:pre-wrap;word-break:break-word}
+.ket-empty{color:#ccc;font-size:11px}
 
-  .wa-panel { background: #0a1929; border-radius: 10px; padding: 16px; }
-  .wa-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 0.5px solid rgba(255,255,255,0.1); }
-  .wa-avatar { width: 36px; height: 36px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; }
-  .wa-name { color: white; font-size: 14px; font-weight: 500; }
-  .wa-status { color: #81c784; font-size: 11px; }
+/* ===== MODAL ===== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:14px;padding:22px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:16px;color:#1a2744}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
 
-  .chat-messages { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; max-height: 340px; overflow-y: auto; padding-right: 4px; }
-  .msg { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 13px; line-height: 1.5; }
-  .msg.user { background: #1b5e20; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-  .msg.bot { background: #1e3057; color: rgba(255,255,255,0.92); align-self: flex-start; border-bottom-left-radius: 2px; }
-  .msg.system { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5); align-self: center; font-size: 11px; border-radius: 6px; }
-  .msg-time { font-size: 10px; opacity: 0.55; margin-top: 3px; text-align: right; }
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:80px;right:16px;padding:11px 18px;border-radius:9px;font-size:13px;color:#fff;z-index:9998;transform:translateY(20px);opacity:0;transition:.3s;max-width:300px;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#2e7d32}
+.toast.err{background:#c62828}
+.toast.info{background:#1565c0}
 
-  .wa-input-row { display: flex; gap: 8px; }
-  .wa-input { flex: 1; background: #1e3057; border: 0.5px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 9px 14px; color: white; font-size: 13px; font-family: inherit; }
-  .wa-input::placeholder { color: rgba(255,255,255,0.35); }
-  .wa-input:focus { outline: none; border-color: rgba(76,175,80,0.5); }
-  .wa-send { background: #4CAF50; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+/* ===== CHAT BOT POPUP ===== */
+.chat-fab{position:fixed;bottom:20px;right:20px;width:52px;height:52px;background:#1a2744;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.3);z-index:1000;transition:.2s;border:none}
+.chat-fab:hover{background:#243563;transform:scale(1.05)}
+.chat-fab-icon{font-size:22px}
+.chat-unread{position:absolute;top:-2px;right:-2px;background:#f44336;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid #fff}
 
-  .quick-cmds { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-  .quick-cmd { padding: 4px 10px; border-radius: 14px; font-size: 11px; cursor: pointer; border: 0.5px solid rgba(76,175,80,0.4); color: #81c784; background: transparent; font-family: inherit; transition: all 0.15s; }
-  .quick-cmd:hover { background: rgba(76,175,80,0.15); }
+.chat-popup{position:fixed;bottom:82px;right:16px;width:340px;max-height:520px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.25);z-index:1001;display:none;flex-direction:column;overflow:hidden;border:1px solid #e0e0e0}
+.chat-popup.open{display:flex}
+.chat-header{background:#1a2744;color:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.chat-avatar{width:32px;height:32px;background:#4CAF50;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.chat-header-info{flex:1}
+.chat-name{font-size:13px;font-weight:600}
+.chat-online{font-size:10px;color:#81c784}
+.chat-close{cursor:pointer;opacity:.7;font-size:18px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.1);border:none;color:#fff}
+.chat-close:hover{opacity:1;background:rgba(255,255,255,.2)}
+.chat-ai-badge{font-size:9px;background:#4CAF50;color:#fff;padding:1px 5px;border-radius:3px;font-weight:700;margin-left:4px}
 
-  .last-update { font-size: 10px; color: var(--color-text-secondary, #888); }
-  .edit-btn { font-size: 11px; padding: 3px 8px; cursor: pointer; border: 0.5px solid #ccc; border-radius: 4px; background: transparent; color: #555; }
-  .edit-btn:hover { background: #f0f0f0; }
+.chat-quick{display:flex;gap:5px;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid #f0f0f0;background:#fafafa}
+.chat-qcmd{padding:3px 9px;border-radius:12px;font-size:11px;cursor:pointer;border:1px solid #d0d0d0;color:#1a2744;background:#fff;font-family:inherit;transition:.15s;white-space:nowrap}
+.chat-qcmd:hover{background:#1a2744;color:#fff;border-color:#1a2744}
 
-  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
-  .modal { background: var(--color-background-primary, white); border-radius: 12px; padding: 20px; max-width: 480px; width: 90%; }
-  .modal-title { font-size: 15px; font-weight: 500; margin-bottom: 14px; }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+.chat-messages{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:7px;min-height:200px;max-height:300px}
+.cmsg{max-width:82%;padding:8px 11px;border-radius:10px;font-size:12.5px;line-height:1.55;word-break:break-word}
+.cmsg.user{background:#1a2744;color:#fff;align-self:flex-end;border-bottom-right-radius:2px}
+.cmsg.bot{background:#f0f2f5;color:#1a1a1a;align-self:flex-start;border-bottom-left-radius:2px}
+.cmsg.thinking{background:#f0f2f5;color:#888;align-self:flex-start;font-style:italic;font-size:12px}
+.cmsg-time{font-size:9px;opacity:.5;margin-top:3px;text-align:right}
+.cmsg-typing span{display:inline-block;width:6px;height:6px;background:#999;border-radius:50%;animation:typing .8s infinite;margin:0 1px}
+.cmsg-typing span:nth-child(2){animation-delay:.2s}
+.cmsg-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
 
-  .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.5px; color: var(--color-text-secondary, #888); margin-bottom: 8px; text-transform: uppercase; }
-  .hidden { display: none; }
-  .col-kode { width: 90px; } .col-nama { width: 160px; } .col-kompi { width: 90px; }
-  .col-jml { width: 55px; } .col-baik { width: 50px; } .col-rusak { width: 55px; }
-  .col-pinjam { width: 60px; } .col-siap { width: 50px; } .col-kondisi { width: 70px; }
-  .col-upd { width: 90px; } .col-aksi { width: 60px; }
+.chat-input-row{display:flex;gap:7px;padding:10px;border-top:1px solid #f0f0f0}
+.chat-input{flex:1;padding:8px 12px;border:1px solid #d0d0d0;border-radius:20px;font-size:13px;font-family:inherit;outline:none;transition:.2s}
+.chat-input:focus{border-color:#1a2744}
+.chat-send{background:#4CAF50;color:#fff;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s}
+.chat-send:hover{background:#388e3c}
+
+/* ===== NOTIFICATION PANEL ===== */
+.notif-panel{position:fixed;top:56px;right:12px;width:300px;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);z-index:500;display:none;border:1px solid #e0e0e0;max-height:380px;overflow:hidden;flex-direction:column}
+.notif-panel.show{display:flex}
+.notif-panel-header{padding:12px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.notif-list{overflow-y:auto;flex:1}
+.notif-item{padding:10px 14px;border-bottom:1px solid #f5f5f5;font-size:12px;cursor:pointer;transition:.15s}
+.notif-item:hover{background:#f9f9f9}
+.notif-item.unread{background:#e8f4fd;border-left:3px solid #1565c0}
+.notif-item-title{font-weight:500;color:#1a1a1a;margin-bottom:2px}
+.notif-item-sub{color:#888;font-size:11px}
+.notif-empty{padding:24px;text-align:center;color:#aaa;font-size:13px}
+
+/* ===== ADMIN PANELS ===== */
+.user-list-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.u-avatar{width:34px;height:34px;border-radius:50%;background:#1a2744;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.u-info{flex:1;min-width:0}
+.u-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u-meta{font-size:11px;color:#888}
+.u-actions{display:flex;gap:5px;flex-wrap:wrap}
+.pending-badge{background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600}
+.approved-badge{background:#e8f5e9;color:#2e7d32;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600}
+
+/* ===== MOBILE ===== */
+@media(max-width:640px){
+  .chat-popup{width:calc(100vw - 24px);right:12px;bottom:76px}
+  .form-row{grid-template-columns:1fr 1fr}
+  .stats-row{grid-template-columns:repeat(3,1fr)}
+  td,th{padding:6px 7px;font-size:12px}
+  .ket-wrap{max-width:120px}
+  .modal{padding:16px}
+  .notif-panel{width:calc(100vw - 24px)}
+  .header-title{font-size:14px}
+}
+@media(max-width:400px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .form-row{grid-template-columns:1fr}
+}
+.hidden{display:none!important}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-logo">YK</div>
-  <div>
-    <div class="header-title">Yonkomlek Bot Data</div>
-    <div class="header-sub">Sistem Database Inventaris Satuan</div>
-  </div>
-  <div class="header-right">
-    <div style="text-align:right;">
-      <div style="font-size:11px;color:rgba(255,255,255,0.7);" id="tanggalHeader"></div>
-      <div style="font-size:10px;color:#81c784;">● Sistem Aktif</div>
+<!-- ===== AUTH SCREEN ===== -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">YK</div>
+    <div class="auth-title">Yonkomlek Bot Data</div>
+    <div class="auth-sub">Sistem Database Inventaris Satuan</div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabLogin" onclick="showAuthTab('login')">Masuk</div>
+      <div class="auth-tab" id="tabRegister" onclick="showAuthTab('register')">Daftar</div>
+    </div>
+    <!-- LOGIN -->
+    <div id="loginForm" class="auth-form">
+      <input class="auth-input" id="loginUser" placeholder="Username" autocomplete="username" />
+      <input class="auth-input" id="loginPass" type="password" placeholder="Password" autocomplete="current-password" />
+      <button class="auth-btn" onclick="doLogin()">Masuk</button>
+      <div id="loginMsg"></div>
+    </div>
+    <!-- REGISTER -->
+    <div id="registerForm" class="auth-form hidden">
+      <input class="auth-input" id="regNama" placeholder="Nama Lengkap" />
+      <input class="auth-input" id="regUser" placeholder="Username (tanpa spasi)" />
+      <input class="auth-input" id="regPass" type="password" placeholder="Password" />
+      <input class="auth-input" id="regUnit" placeholder="Unit / Kompi" />
+      <button class="auth-btn" onclick="doRegister()">Daftar & Minta Persetujuan</button>
+      <div id="regMsg"></div>
+    </div>
+    <!-- PENDING STATE -->
+    <div id="pendingMsg" class="pending-msg hidden">
+      ⏳ Akun Anda sedang menunggu persetujuan admin.<br>Silakan hubungi admin satuan.<br><br>
+      <button class="auth-btn secondary" onclick="logout()" style="width:auto;padding:7px 18px;margin:0 auto;display:block;">Keluar</button>
     </div>
   </div>
 </div>
 
-<div class="tab-bar">
-  <div class="tab active" onclick="switchTab('gudang')" id="tabGudang">Panel Gudang (Input)</div>
-  <div class="tab" onclick="switchTab('bot')" id="tabBot">WhatsApp Bot (Komandan)</div>
-</div>
+<!-- ===== MAIN APP ===== -->
+<div class="app-wrap" id="appWrap">
 
-<div class="main" id="viewGudang">
-
-  <div class="stats-row" id="statsRow"></div>
-
-  <div class="card">
-    <div class="card-title">Tambah / Update Data Barang</div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Kompi</label>
-        <select id="formKompi">
-          <option value="KI-MAR">Kompi Markas</option>
-          <option value="KI-BAN">Kompi Bantuan</option>
-          <option value="KI-OPS">Kompi Sikoops</option>
-          <option value="KI-LEK">Kompi Sislek</option>
-          <option value="KI-NIK">Kompi Pernika</option>
-          <option value="KI-KOM">Kompi Komunikasi</option>
-          <option value="LOG">Barang Log</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Nama Barang</label>
-        <input type="text" id="formNama" placeholder="cth: Radio Jammer HF" />
-      </div>
-      <div class="form-group">
-        <label>Jumlah Total</label>
-        <input type="number" id="formJumlah" min="0" value="1" />
-      </div>
-      <div class="form-group">
-        <label>Kondisi Baik</label>
-        <input type="number" id="formBaik" min="0" value="1" />
-      </div>
-      <div class="form-group">
-        <label>Kondisi Rusak</label>
-        <input type="number" id="formRusak" min="0" value="0" />
-      </div>
-      <div class="form-group">
-        <label>Dipinjam</label>
-        <input type="number" id="formPinjam" min="0" value="0" />
-      </div>
-      <div class="form-group" style="grid-column:1 / -1;">
-        <label>Keterangan</label>
-        <input type="text" id="formKeterangan" placeholder="Contoh: Set A, Box 1, Lengkap" />
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn primary" onclick="tambahBarang()">Simpan Barang</button>
-      <button class="btn" onclick="resetForm()">Reset</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Data Inventaris Barang</div>
-    <div class="filter-bar" id="filterBar"></div>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <input type="text" id="searchInput" placeholder="Cari nama barang..." style="flex:1;padding:7px 12px;border:0.5px solid var(--color-border-secondary,#ccc);border-radius:6px;font-size:13px;background:var(--color-background-primary,white);color:var(--color-text-primary,#1a1a1a);" oninput="renderTable()" />
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th class="col-kode">Kode</th>
-            <th class="col-nama">Nama Barang</th>
-            <th class="col-kompi">Kompi</th>
-            <th class="col-jml">Total</th>
-            <th class="col-baik">Baik</th>
-            <th class="col-rusak">Rusak</th>
-            <th class="col-pinjam">Pinjam</th>
-            <th class="col-siap">Siap</th>
-            <th class="col-upd">Update</th>
-            <th class="col-ket">Keterangan</th>
-            <th class="col-aksi">Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-    <div style="font-size:12px;color:var(--color-text-secondary,#888);margin-top:10px;" id="tableInfo"></div>
-  </div>
-</div>
-
-<div class="main hidden" id="viewBot">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+  <div class="header">
+    <div class="header-logo">YK</div>
     <div>
-      <div class="section-label">Simulasi WhatsApp Bot</div>
-      <div class="wa-panel">
-        <div class="wa-header">
-          <div class="wa-avatar">YK</div>
-          <div>
-            <div class="wa-name">Yonkomlek Bot</div>
-            <div class="wa-status">online</div>
+      <div class="header-title">Yonkomlek Bot Data</div>
+      <div class="header-sub" id="hdrDate"></div>
+    </div>
+    <div class="header-right">
+      <div class="notif-bell" onclick="toggleNotifPanel()" id="bellBtn">
+        🔔
+        <div class="notif-dot hidden" id="notifDot"></div>
+      </div>
+      <div class="user-chip" onclick="toggleUserMenu()">
+        <div class="user-avatar" id="hdrAvatar">?</div>
+        <span id="hdrUsername">User</span>
+        <span class="role-badge" id="hdrRole"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- User dropdown menu -->
+  <div id="userMenu" style="display:none;position:fixed;top:52px;right:12px;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:600;min-width:160px;border:1px solid #e0e0e0">
+    <div style="padding:10px 14px;border-bottom:1px solid #f0f0f0">
+      <div style="font-size:13px;font-weight:600" id="menuName"></div>
+      <div style="font-size:11px;color:#888" id="menuUnit"></div>
+    </div>
+    <div style="padding:6px">
+      <div onclick="logout()" style="padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:#c62828;display:flex;align-items:center;gap:6px" onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='transparent'">🚪 Keluar</div>
+    </div>
+  </div>
+
+  <!-- Notification Panel -->
+  <div class="notif-panel" id="notifPanel">
+    <div class="notif-panel-header">
+      🔔 Notifikasi
+      <button class="btn sm" onclick="tandaiSemuaBaca()" style="font-size:10px">Tandai baca semua</button>
+    </div>
+    <div class="notif-list" id="notifList"><div class="notif-empty">Tidak ada notifikasi</div></div>
+  </div>
+
+  <div class="tab-bar" id="tabBar"></div>
+
+  <!-- VIEWS -->
+  <div id="viewAdmin" class="hidden">
+    <!-- Admin Panel: Inventaris -->
+    <div class="main" id="adminInventaris">
+      <div class="stats-row" id="statsRow"></div>
+      <div class="card">
+        <div class="card-title">➕ Tambah Barang Baru</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Kompi</label>
+            <select id="formKompi">
+              <option value="KI-MAR">Kompi Markas</option>
+              <option value="KI-BAN">Kompi Bantuan</option>
+              <option value="KI-OPS">Kompi Sikoops</option>
+              <option value="KI-LEK">Kompi Sislek</option>
+              <option value="KI-NIK">Kompi Pernika</option>
+              <option value="KI-KOM">Kompi Komunikasi</option>
+              <option value="LOG">Barang Log</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nama Barang</label>
+            <input type="text" id="formNama" placeholder="cth: Radio Jammer HF" />
+          </div>
+          <div class="form-group">
+            <label>Jumlah Total</label>
+            <input type="number" id="formJumlah" min="0" value="1" />
+          </div>
+          <div class="form-group">
+            <label>Kondisi Baik</label>
+            <input type="number" id="formBaik" min="0" value="1" />
+          </div>
+          <div class="form-group">
+            <label>Kondisi Rusak</label>
+            <input type="number" id="formRusak" min="0" value="0" />
+          </div>
+          <div class="form-group">
+            <label>Dipinjam</label>
+            <input type="number" id="formPinjam" min="0" value="0" />
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>Keterangan (Enter untuk baris baru)</label>
+            <textarea id="formKet" placeholder="Contoh:&#10;Set A - Box 1&#10;Kondisi Prima&#10;Perlu servis berkala" rows="3"></textarea>
           </div>
         </div>
-        <div class="quick-cmds" id="quickCmds"></div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="wa-input-row">
-          <input class="wa-input" id="waInput" placeholder="Ketik pertanyaan..." onkeydown="if(event.key==='Enter')kirimPesan()" />
-          <button class="wa-send" onclick="kirimPesan()">➤</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn primary" onclick="tambahBarang()">💾 Simpan Barang</button>
+          <button class="btn" onclick="resetForm()">🔄 Reset</button>
         </div>
       </div>
+      <div class="card">
+        <div class="card-title">
+          <span>📋 Data Inventaris</span>
+          <button class="btn sm" onclick="exportCSV()">📥 Export CSV</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <input type="text" id="searchInput" placeholder="🔍 Cari nama atau kode..." style="flex:1;min-width:160px;padding:7px 12px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;font-family:inherit" oninput="renderTable()" />
+        </div>
+        <div class="filter-bar" id="filterBar"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:90px">Kode</th>
+                <th style="width:150px">Nama Barang</th>
+                <th style="width:85px">Kompi</th>
+                <th style="width:48px">Total</th>
+                <th style="width:44px">Baik</th>
+                <th style="width:48px">Rusak</th>
+                <th style="width:52px">Pinjam</th>
+                <th style="width:44px">Siap</th>
+                <th style="width:82px">Update</th>
+                <th>Keterangan</th>
+                <th style="width:70px">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div style="font-size:12px;color:#999;margin-top:8px" id="tableInfo"></div>
+      </div>
     </div>
-    <div>
-      <div class="section-label">Panduan Perintah Bot</div>
-      <div class="card" style="font-size:12.5px;line-height:1.8;">
-        <div style="margin-bottom:10px;"><strong>Perintah Tersedia:</strong></div>
-        <div style="display:flex;flex-direction:column;gap:6px;" id="panduanList"></div>
+
+    <!-- Admin Panel: Kelola User (tab terpisah) -->
+    <div class="main hidden" id="adminUsers">
+      <div class="card">
+        <div class="card-title">⏳ Permintaan Pendaftaran</div>
+        <div id="pendingList"><div style="color:#aaa;font-size:13px;padding:12px 0">Tidak ada permintaan</div></div>
       </div>
-      <div class="card" style="margin-top:0;">
-        <div class="card-title">Rekap Per Kompi</div>
-        <div id="rekapKompi" style="font-size:12.5px;"></div>
+      <div class="card">
+        <div class="card-title">👥 Semua Pengguna</div>
+        <div id="allUserList"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- USER VIEW (read only) -->
+  <div id="viewUser" class="hidden">
+    <div class="main">
+      <div class="stats-row" id="userStatsRow"></div>
+      <div class="card">
+        <div class="card-title">📋 Data Inventaris (Hanya Lihat)</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <input type="text" id="userSearchInput" placeholder="🔍 Cari nama atau kode..." style="flex:1;min-width:160px;padding:7px 12px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;font-family:inherit" oninput="renderUserTable()" />
+        </div>
+        <div class="filter-bar" id="userFilterBar"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:90px">Kode</th>
+                <th>Nama Barang</th>
+                <th style="width:85px">Kompi</th>
+                <th style="width:48px">Total</th>
+                <th style="width:44px">Baik</th>
+                <th style="width:48px">Rusak</th>
+                <th style="width:52px">Pinjam</th>
+                <th style="width:44px">Siap</th>
+                <th style="width:82px">Update</th>
+                <th>Keterangan</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody"></tbody>
+          </table>
+        </div>
+        <div style="font-size:12px;color:#999;margin-top:8px" id="userTableInfo"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app-wrap -->
+
+<!-- ===== CHAT FAB ===== -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" style="display:none">
+  <span class="chat-fab-icon">💬</span>
+  <div class="chat-unread hidden" id="chatUnread">0</div>
+</button>
+
+<!-- ===== CHAT POPUP ===== -->
+<div class="chat-popup" id="chatPopup">
+  <div class="chat-header">
+    <div class="chat-avatar">YK</div>
+    <div class="chat-header-info">
+      <div class="chat-name">Asisten Inventaris <span class="chat-ai-badge">AI</span></div>
+      <div class="chat-online">● Online — Powered by Claude AI</div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-quick" id="chatQuick"></div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" placeholder="Tanya sesuatu..." onkeydown="if(event.key==='Enter'&&!event.shiftKey)kirimChat()" />
+    <button class="chat-send" onclick="kirimChat()">➤</button>
+  </div>
+</div>
+
+<!-- ===== MODAL EDIT ===== -->
+<div class="modal-overlay" id="modalEdit">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Data Barang</div>
+    <div class="form-row">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Nama Barang</label>
+        <input type="text" id="editNama" />
+      </div>
+      <div class="form-group"><label>Jumlah Total</label><input type="number" id="editJumlah" /></div>
+      <div class="form-group"><label>Kondisi Baik</label><input type="number" id="editBaik" /></div>
+      <div class="form-group"><label>Kondisi Rusak</label><input type="number" id="editRusak" /></div>
+      <div class="form-group"><label>Dipinjam</label><input type="number" id="editPinjam" /></div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Keterangan (Enter untuk baris baru)</label>
+        <textarea id="editKet" rows="3" placeholder="Contoh:&#10;Set A - Box 1&#10;Kondisi Prima"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="tutupModal('modalEdit')">Batal</button>
+      <button class="btn success" onclick="simpanEdit()">✅ Simpan</button>
     </div>
   </div>
 </div>
 
-<div id="modalEdit" class="hidden">
-  <div class="modal-overlay">
-    <div class="modal">
-      <div class="modal-title">Edit Data Barang</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nama Barang</label>
-          <input type="text" id="editNama" />
-        </div>
-        <div class="form-group">
-          <label>Jumlah Total</label>
-          <input type="number" id="editJumlah" />
-        </div>
-        <div class="form-group">
-          <label>Kondisi Baik</label>
-          <input type="number" id="editBaik" />
-        </div>
-        <div class="form-group">
-          <label>Kondisi Rusak</label>
-          <input type="number" id="editRusak" />
-        </div>
-        <div class="form-group">
-          <label>Dipinjam</label>
-          <input type="number" id="editPinjam" />
-        </div>
-        <div class="form-group" style="grid-column:1 / -1;">
-          <label>Keterangan</label>
-          <input type="text" id="editKeterangan" placeholder="Contoh: Set A, Box 1, Lengkap" />
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn" onclick="tutupModal()">Batal</button>
-        <button class="btn primary" onclick="simpanEdit()">Simpan</button>
-      </div>
+<!-- ===== MODAL ROLE ===== -->
+<div class="modal-overlay" id="modalRole">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-title">🛡️ Atur Hak Akses</div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;margin-bottom:4px">Pengguna: <strong id="roleTargetName"></strong></div>
+      <div style="font-size:12px;color:#888" id="roleTargetUnit"></div>
+    </div>
+    <div class="form-group">
+      <label>Pilih Level Akses</label>
+      <select id="roleSelect">
+        <option value="user">👤 User — Hanya lihat data</option>
+        <option value="admin">🛡️ Admin — Lihat & edit data</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="tutupModal('modalRole')">Batal</button>
+      <button class="btn primary" onclick="simpanRole()">Simpan</button>
     </div>
   </div>
 </div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
+// ============================================================
+// DATA STORE (LocalStorage-based)
+// ============================================================
+const STORE_KEY = 'yk_data_v3';
+const USERS_KEY = 'yk_users_v3';
+const NOTIF_KEY = 'yk_notif_v3';
+const SESS_KEY  = 'yk_session_v3';
+
+function loadStore(){
+  try{ return JSON.parse(localStorage.getItem(STORE_KEY))||defaultStore(); }catch(e){ return defaultStore(); }
+}
+function saveStore(s){ localStorage.setItem(STORE_KEY,JSON.stringify(s)); }
+function loadUsers(){
+  try{ return JSON.parse(localStorage.getItem(USERS_KEY))||defaultUsers(); }catch(e){ return defaultUsers(); }
+}
+function saveUsers(u){ localStorage.setItem(USERS_KEY,JSON.stringify(u)); }
+function loadNotifs(){
+  try{ return JSON.parse(localStorage.getItem(NOTIF_KEY))||[]; }catch(e){ return []; }
+}
+function saveNotifs(n){ localStorage.setItem(NOTIF_KEY,JSON.stringify(n)); }
+function loadSession(){
+  try{ return JSON.parse(localStorage.getItem(SESS_KEY))||null; }catch(e){ return null; }
+}
+function saveSession(s){ localStorage.setItem(SESS_KEY,JSON.stringify(s)); }
+
+function defaultUsers(){
+  // Admin master default — username: admin, password: admin123
+  return [{
+    id:'u0', username:'admin', password:'admin123',
+    nama:'Admin Master', unit:'Yonkomlek',
+    role:'master', status:'approved',
+    joinDate: new Date().toISOString().slice(0,10)
+  }];
+}
+
+function defaultStore(){
+  return {
+    counter:{'KI-MAR':1,'KI-BAN':1,'KI-OPS':2,'KI-LEK':2,'KI-NIK':2,'KI-KOM':3,'LOG':1},
+    barang:[
+      {id:1,kode:'KI-KOM-001',kompi:'KI-KOM',nama:'Radio HF Jammer',jumlah:6,baik:4,rusak:1,pinjam:1,ket:'Unit 1-4 aktif\nUnit 5 perbaikan\nUnit 6 cadangan',update:'2025-04-04',updBy:'admin'},
+      {id:2,kode:'KI-KOM-002',kompi:'KI-KOM',nama:'Radio VHF Manpack',jumlah:12,baik:10,rusak:2,pinjam:0,ket:'',update:'2025-04-04',updBy:'admin'},
+      {id:3,kode:'KI-KOM-003',kompi:'KI-KOM',nama:'Antena Directional',jumlah:4,baik:3,rusak:1,pinjam:0,ket:'',update:'2025-04-03',updBy:'admin'},
+      {id:4,kode:'KI-NIK-001',kompi:'KI-NIK',nama:'Crypto Box CX-52',jumlah:3,baik:3,rusak:0,pinjam:0,ket:'Kondisi prima',update:'2025-04-04',updBy:'admin'},
+      {id:5,kode:'KI-NIK-002',kompi:'KI-NIK',nama:'Fax Secure Unit',jumlah:2,baik:1,rusak:1,pinjam:0,ket:'1 unit dalam perbaikan',update:'2025-04-02',updBy:'admin'},
+      {id:6,kode:'KI-OPS-001',kompi:'KI-OPS',nama:'Laptop Ops Taktis',jumlah:5,baik:4,rusak:0,pinjam:1,ket:'',update:'2025-04-04',updBy:'admin'},
+      {id:7,kode:'KI-OPS-002',kompi:'KI-OPS',nama:'GPS Handheld',jumlah:8,baik:7,rusak:1,pinjam:0,ket:'',update:'2025-04-04',updBy:'admin'},
+      {id:8,kode:'KI-LEK-001',kompi:'KI-LEK',nama:'Drone Recon Mini',jumlah:3,baik:2,rusak:1,pinjam:0,ket:'Perlu suku cadang baterai',update:'2025-04-03',updBy:'admin'},
+      {id:9,kode:'KI-LEK-002',kompi:'KI-LEK',nama:'Sensor Elektronik',jumlah:10,baik:8,rusak:2,pinjam:0,ket:'',update:'2025-04-04',updBy:'admin'},
+      {id:10,kode:'KI-MAR-001',kompi:'KI-MAR',nama:'Meja Komando Lipat',jumlah:4,baik:4,rusak:0,pinjam:0,ket:'',update:'2025-04-01',updBy:'admin'},
+      {id:11,kode:'KI-BAN-001',kompi:'KI-BAN',nama:'Generator 5KVA',jumlah:2,baik:2,rusak:0,pinjam:0,ket:'Bahan bakar cukup',update:'2025-04-04',updBy:'admin'},
+      {id:12,kode:'LOG-001',kompi:'LOG',nama:'Kabel Coax RG-58 50m',jumlah:20,baik:18,rusak:2,pinjam:0,ket:'',update:'2025-04-02',updBy:'admin'},
+    ]
+  };
+}
+
+// ============================================================
+// CONSTANTS
+// ============================================================
 const KOMPI_LIST = [
   {kode:'KI-MAR',label:'Kompi Markas',warna:'#4527a0'},
   {kode:'KI-BAN',label:'Kompi Bantuan',warna:'#1565c0'},
@@ -290,323 +543,669 @@ const KOMPI_LIST = [
   {kode:'LOG',label:'Barang Log',warna:'#5d4037'},
 ];
 
-let editingId = null;
-let filterAktif = 'SEMUA';
-let counter = {
-  'KI-MAR':0,'KI-BAN':0,'KI-OPS':0,'KI-LEK':0,'KI-NIK':0,'KI-KOM':0,'LOG':0
-};
-
-let data = [
-  {id:1,kode:'KI-KOM-001',kompi:'KI-KOM',nama:'Radio HF Jammer',jumlah:6,baik:4,rusak:1,pinjam:1,update:'2025-04-04',keterangan:''},
-  {id:2,kode:'KI-KOM-002',kompi:'KI-KOM',nama:'Radio VHF Manpack',jumlah:12,baik:10,rusak:2,pinjam:0,update:'2025-04-04',keterangan:''},
-  {id:3,kode:'KI-KOM-003',kompi:'KI-KOM',nama:'Antena Directional',jumlah:4,baik:3,rusak:1,pinjam:0,update:'2025-04-03',keterangan:''},
-  {id:4,kode:'KI-NIK-001',kompi:'KI-NIK',nama:'Crypto Box CX-52',jumlah:3,baik:3,rusak:0,pinjam:0,update:'2025-04-04',keterangan:''},
-  {id:5,kode:'KI-NIK-002',kompi:'KI-NIK',nama:'Fax Secure Unit',jumlah:2,baik:1,rusak:1,pinjam:0,update:'2025-04-02',keterangan:''},
-  {id:6,kode:'KI-OPS-001',kompi:'KI-OPS',nama:'Laptop Ops Taktis',jumlah:5,baik:4,rusak:0,pinjam:1,update:'2025-04-04',keterangan:''},
-  {id:7,kode:'KI-OPS-002',kompi:'KI-OPS',nama:'GPS Handheld',jumlah:8,baik:7,rusak:1,pinjam:0,update:'2025-04-04',keterangan:''},
-  {id:8,kode:'KI-LEK-001',kompi:'KI-LEK',nama:'Drone Recon Mini',jumlah:3,baik:2,rusak:1,pinjam:0,update:'2025-04-03',keterangan:''},
-  {id:9,kode:'KI-LEK-002',kompi:'KI-LEK',nama:'Sensor Elektronik',jumlah:10,baik:8,rusak:2,pinjam:0,update:'2025-04-04',keterangan:''},
-  {id:10,kode:'KI-MAR-001',kompi:'KI-MAR',nama:'Meja Komando Lipat',jumlah:4,baik:4,rusak:0,pinjam:0,update:'2025-04-01',keterangan:''},
-  {id:11,kode:'KI-BAN-001',kompi:'KI-BAN',nama:'Generator 5KVA',jumlah:2,baik:2,rusak:0,pinjam:0,update:'2025-04-04',keterangan:''},
-  {id:12,kode:'LOG-001',kompi:'LOG',nama:'Kabel Coax 50m',jumlah:20,baik:18,rusak:2,pinjam:0,update:'2025-04-02',keterangan:''},
+const QUICK_CMDS = [
+  'Rekap semua','Barang rusak','Siap ops','Dipinjam',
+  'Kompi komunikasi','Update terakhir','Jammer ada berapa?'
 ];
 
-counter = {'KI-MAR':1,'KI-BAN':1,'KI-OPS':2,'KI-LEK':2,'KI-NIK':2,'KI-KOM':3,'LOG':1};
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let store = loadStore();
+let users = loadUsers();
+let notifs = loadNotifs();
+let editingId = null;
+let roleTargetId = null;
+let filterAktif = 'SEMUA';
+let userFilterAktif = 'SEMUA';
+let adminSubView = 'inventaris';
+let chatOpen = false;
+let chatMessages = [];
+let notifPanelOpen = false;
+let userMenuOpen = false;
 
-function getKompiLabel(kode){
-  const k = KOMPI_LIST.find(x=>x.kode===kode);
-  return k ? k.label : kode;
+// ============================================================
+// AUTH
+// ============================================================
+function showAuthTab(tab){
+  document.getElementById('loginForm').classList.toggle('hidden', tab!=='login');
+  document.getElementById('registerForm').classList.toggle('hidden', tab!=='register');
+  document.getElementById('pendingMsg').classList.add('hidden');
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
 }
-function getKompiWarna(kode){
-  const k = KOMPI_LIST.find(x=>x.kode===kode);
-  return k ? k.warna : '#555';
+
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const msg = document.getElementById('loginMsg');
+  if(!u||!p){ msg.innerHTML='<div class="auth-err">Username dan password wajib diisi</div>'; return; }
+  users = loadUsers();
+  const found = users.find(x=>x.username===u && x.password===p);
+  if(!found){ msg.innerHTML='<div class="auth-err">Username atau password salah</div>'; return; }
+  if(found.status==='pending'){
+    document.getElementById('loginForm').classList.add('hidden');
+    document.getElementById('pendingMsg').classList.remove('hidden');
+    return;
+  }
+  if(found.status==='rejected'){ msg.innerHTML='<div class="auth-err">Akun Anda ditolak. Hubungi admin.</div>'; return; }
+  currentUser = found;
+  saveSession({username:u, id:found.id});
+  msg.innerHTML='';
+  launchApp();
 }
-function getSiapOps(item){
-  return Math.max(0, item.jumlah - item.rusak - item.pinjam);
+
+function doRegister(){
+  const nama = document.getElementById('regNama').value.trim();
+  const u    = document.getElementById('regUser').value.trim().replace(/\s/g,'');
+  const p    = document.getElementById('regPass').value;
+  const unit = document.getElementById('regUnit').value.trim();
+  const msg  = document.getElementById('regMsg');
+  if(!nama||!u||!p||!unit){ msg.innerHTML='<div class="auth-err">Semua field wajib diisi</div>'; return; }
+  users = loadUsers();
+  if(users.find(x=>x.username===u)){ msg.innerHTML='<div class="auth-err">Username sudah digunakan</div>'; return; }
+  const newUser = {
+    id:'u'+Date.now(), username:u, password:p,
+    nama, unit, role:'user', status:'pending',
+    joinDate: new Date().toISOString().slice(0,10)
+  };
+  users.push(newUser);
+  saveUsers(users);
+  // Notifikasi ke admin
+  addNotif(`Pendaftaran baru: ${nama} (${unit})`, `User "${u}" meminta persetujuan akun`, 'admin_all');
+  msg.innerHTML='<div class="auth-ok">Berhasil! Tunggu persetujuan admin.</div>';
+  document.getElementById('regNama').value='';
+  document.getElementById('regUser').value='';
+  document.getElementById('regPass').value='';
+  document.getElementById('regUnit').value='';
 }
-function formatTgl(str){
+
+function logout(){
+  currentUser=null;
+  saveSession(null);
+  location.reload();
+}
+
+function tryAutoLogin(){
+  const sess = loadSession();
+  if(!sess) return false;
+  users = loadUsers();
+  const found = users.find(x=>x.id===sess.id && x.username===sess.username);
+  if(!found || found.status!=='approved') return false;
+  currentUser = found;
+  return true;
+}
+
+// ============================================================
+// APP INIT
+// ============================================================
+function launchApp(){
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('appWrap').style.display='flex';
+  document.getElementById('chatFab').style.display='flex';
+
+  // Header
+  document.getElementById('hdrDate').textContent = new Date().toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('hdrAvatar').textContent = currentUser.nama[0].toUpperCase();
+  document.getElementById('hdrUsername').textContent = currentUser.nama.split(' ')[0];
+  document.getElementById('menuName').textContent = currentUser.nama;
+  document.getElementById('menuUnit').textContent = currentUser.unit;
+  const roleBadge = document.getElementById('hdrRole');
+  if(currentUser.role==='master'){ roleBadge.textContent='Master'; roleBadge.className='role-badge role-master'; }
+  else if(currentUser.role==='admin'){ roleBadge.textContent='Admin'; roleBadge.className='role-badge role-admin'; }
+  else { roleBadge.textContent='User'; roleBadge.className='role-badge role-user'; }
+
+  buildTabs();
+  store = loadStore();
+  renderAll();
+  renderNotifs();
+  updateNotifDot();
+  addChatMsg('🪖 Selamat datang di Asisten Inventaris Yonkomlek!\n\nSaya didukung AI — silakan tanya apa saja tentang data inventaris satuan. Gunakan tombol cepat di atas atau ketik langsung.','bot');
+  renderQuickCmds();
+}
+
+function buildTabs(){
+  const tb = document.getElementById('tabBar');
+  const isAdmin = currentUser.role==='admin'||currentUser.role==='master';
+  if(isAdmin){
+    tb.innerHTML=`
+      <div class="tab active" id="tab-inv" onclick="switchAdminTab('inventaris')">📦 Inventaris</div>
+      <div class="tab" id="tab-usr" onclick="switchAdminTab('users')">👥 Kelola User</div>
+    `;
+    document.getElementById('viewAdmin').classList.remove('hidden');
+    document.getElementById('viewUser').classList.add('hidden');
+  } else {
+    tb.innerHTML='';
+    document.getElementById('viewAdmin').classList.add('hidden');
+    document.getElementById('viewUser').classList.remove('hidden');
+  }
+}
+
+function switchAdminTab(v){
+  adminSubView=v;
+  document.getElementById('adminInventaris').classList.toggle('hidden', v!=='inventaris');
+  document.getElementById('adminUsers').classList.toggle('hidden', v!=='users');
+  document.getElementById('tab-inv').classList.toggle('active', v==='inventaris');
+  document.getElementById('tab-usr').classList.toggle('active', v==='users');
+  if(v==='users') renderUserAdmin();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getKompi(kode){ return KOMPI_LIST.find(x=>x.kode===kode)||{label:kode,warna:'#555'}; }
+function getSiap(item){ return Math.max(0,item.baik-item.pinjam); }
+function fmtTgl(str){
   if(!str) return '-';
-  const d = new Date(str);
-  return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'2-digit'});
+  try{ return new Date(str).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'2-digit'}); }catch(e){ return str; }
 }
-function now(){
-  return new Date().toISOString().slice(0,10);
+function nowDate(){ return new Date().toISOString().slice(0,10); }
+function nowTs(){ return new Date().toISOString(); }
+function nowTime(){ const n=new Date(); return n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0'); }
+
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className=`toast ${type} show`;
+  setTimeout(()=>t.className='toast',2800);
 }
 
+function tutupModal(id){ document.getElementById(id).classList.remove('show'); editingId=null; roleTargetId=null; }
+
+function formatKet(val){
+  if(!val||!val.trim()) return '<span class="ket-empty">—</span>';
+  const lines=val.split('\n').map(x=>x.trim()).filter(Boolean);
+  if(!lines.length) return '<span class="ket-empty">—</span>';
+  return `<div class="ket-wrap">${lines.map(x=>`<span class="ket-badge">${x}</span>`).join('')}</div>`;
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+function addNotif(title,sub,targetRole,ts){
+  notifs = loadNotifs();
+  notifs.unshift({id:'n'+Date.now(),title,sub,targetRole:targetRole||'admin_all',ts:ts||nowTs(),readBy:[]});
+  if(notifs.length>100) notifs=notifs.slice(0,100);
+  saveNotifs(notifs);
+}
+
+function getMyNotifs(){
+  notifs=loadNotifs();
+  return notifs.filter(n=>{
+    if(n.targetRole==='all') return true;
+    if(n.targetRole==='admin_all' && (currentUser.role==='admin'||currentUser.role==='master')) return true;
+    if(n.targetRole==='master' && currentUser.role==='master') return true;
+    if(n.targetRole===currentUser.id) return true;
+    return false;
+  });
+}
+
+function countUnread(){
+  return getMyNotifs().filter(n=>!n.readBy.includes(currentUser.id)).length;
+}
+
+function updateNotifDot(){
+  const cnt=countUnread();
+  document.getElementById('notifDot').classList.toggle('hidden',cnt===0);
+}
+
+function renderNotifs(){
+  const list=document.getElementById('notifList');
+  const myN=getMyNotifs().slice(0,30);
+  if(!myN.length){ list.innerHTML='<div class="notif-empty">Tidak ada notifikasi</div>'; return; }
+  list.innerHTML=myN.map(n=>{
+    const unread=!n.readBy.includes(currentUser.id);
+    return `<div class="notif-item ${unread?'unread':''}" onclick="bacaNotif('${n.id}')">
+      <div class="notif-item-title">${n.title}</div>
+      <div class="notif-item-sub">${n.sub} · ${fmtTgl(n.ts)}</div>
+    </div>`;
+  }).join('');
+}
+
+function bacaNotif(id){
+  notifs=loadNotifs();
+  const n=notifs.find(x=>x.id===id);
+  if(n&&!n.readBy.includes(currentUser.id)) n.readBy.push(currentUser.id);
+  saveNotifs(notifs);
+  renderNotifs();
+  updateNotifDot();
+}
+
+function tandaiSemuaBaca(){
+  notifs=loadNotifs();
+  notifs.forEach(n=>{ if(!n.readBy.includes(currentUser.id)) n.readBy.push(currentUser.id); });
+  saveNotifs(notifs);
+  renderNotifs();
+  updateNotifDot();
+}
+
+function toggleNotifPanel(){
+  notifPanelOpen=!notifPanelOpen;
+  document.getElementById('notifPanel').classList.toggle('show',notifPanelOpen);
+  if(userMenuOpen){ userMenuOpen=false; document.getElementById('userMenu').style.display='none'; }
+  if(notifPanelOpen) renderNotifs();
+}
+
+function toggleUserMenu(){
+  userMenuOpen=!userMenuOpen;
+  document.getElementById('userMenu').style.display=userMenuOpen?'block':'none';
+  if(notifPanelOpen){ notifPanelOpen=false; document.getElementById('notifPanel').classList.remove('show'); }
+}
+
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#notifPanel')&&!e.target.closest('#bellBtn')){ notifPanelOpen=false; document.getElementById('notifPanel').classList.remove('show'); }
+  if(!e.target.closest('#userMenu')&&!e.target.closest('.user-chip')){ userMenuOpen=false; document.getElementById('userMenu').style.display='none'; }
+  if(!e.target.closest('#chatPopup')&&!e.target.closest('#chatFab')){ /* keep chat open */ }
+});
+
+// ============================================================
+// RENDER — ADMIN VIEW
+// ============================================================
 function renderStats(){
-  const total = data.reduce((s,x)=>s+x.jumlah,0);
-  const baik = data.reduce((s,x)=>s+x.baik,0);
-  const rusak = data.reduce((s,x)=>s+x.rusak,0);
-  const pinjam = data.reduce((s,x)=>s+x.pinjam,0);
-  const siap = data.reduce((s,x)=>s+getSiapOps(x),0);
-  document.getElementById('statsRow').innerHTML = `
-    <div class="stat-card"><div class="stat-label">Total Item</div><div class="stat-value blue">${data.length}</div></div>
-    <div class="stat-card"><div class="stat-label">Total Unit</div><div class="stat-value">${total}</div></div>
-    <div class="stat-card"><div class="stat-label">Kondisi Baik</div><div class="stat-value green">${baik}</div></div>
-    <div class="stat-card"><div class="stat-label">Rusak</div><div class="stat-value red">${rusak}</div></div>
-    <div class="stat-card"><div class="stat-label">Dipinjam</div><div class="stat-value amber">${pinjam}</div></div>
-    <div class="stat-card"><div class="stat-label">Siap Ops</div><div class="stat-value green">${siap}</div></div>
+  store=loadStore();
+  const d=store.barang;
+  const t=d.reduce((s,x)=>s+x.jumlah,0),b=d.reduce((s,x)=>s+x.baik,0),r=d.reduce((s,x)=>s+x.rusak,0),p=d.reduce((s,x)=>s+x.pinjam,0),s=d.reduce((s,x)=>s+getSiap(x),0);
+  const html=`
+    <div class="stat-card"><div class="stat-label">Jenis Barang</div><div class="stat-value blue">${d.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Unit</div><div class="stat-value">${t}</div></div>
+    <div class="stat-card"><div class="stat-label">Kondisi Baik</div><div class="stat-value green">${b}</div></div>
+    <div class="stat-card"><div class="stat-label">Rusak</div><div class="stat-value red">${r}</div></div>
+    <div class="stat-card"><div class="stat-label">Dipinjam</div><div class="stat-value amber">${p}</div></div>
+    <div class="stat-card"><div class="stat-label">Siap Ops</div><div class="stat-value green">${s}</div></div>
   `;
+  const sr=document.getElementById('statsRow');
+  const usr=document.getElementById('userStatsRow');
+  if(sr) sr.innerHTML=html;
+  if(usr) usr.innerHTML=html;
 }
 
 function renderFilterBar(){
-  const fb = document.getElementById('filterBar');
-  fb.innerHTML = `<button class="filter-chip ${filterAktif==='SEMUA'?'active':''}" onclick="setFilter('SEMUA')">Semua</button>`;
-  KOMPI_LIST.forEach(k=>{
-    const cnt = data.filter(x=>x.kompi===k.kode).length;
-    if(cnt>0) fb.innerHTML += `<button class="filter-chip ${filterAktif===k.kode?'active':''}" onclick="setFilter('${k.kode}')">${k.label} (${cnt})</button>`;
-  });
+  const build=(elId,fn)=>{
+    const fb=document.getElementById(elId);
+    if(!fb) return;
+    const aktif=elId==='filterBar'?filterAktif:userFilterAktif;
+    let h=`<button class="filter-chip ${aktif==='SEMUA'?'active':''}" onclick="${fn}('SEMUA')">Semua</button>`;
+    KOMPI_LIST.forEach(k=>{
+      const cnt=store.barang.filter(x=>x.kompi===k.kode).length;
+      if(cnt>0) h+=`<button class="filter-chip ${aktif===k.kode?'active':''}" onclick="${fn}('${k.kode}')">${k.label.replace('Kompi ','')} (${cnt})</button>`;
+    });
+    fb.innerHTML=h;
+  };
+  build('filterBar','setFilter');
+  build('userFilterBar','setUserFilter');
 }
-function setFilter(k){ filterAktif=k; renderFilterBar(); renderTable(); }
 
-function formatKeterangan(val){
-  if(!val || !val.trim()) return '<span class="ket-empty">-</span>';
-  const items = val
-    .split(/\n|,/)
-    .map(x=>x.trim())
-    .filter(Boolean);
-  if(!items.length) return '<span class="ket-empty">-</span>';
-  return `<div class="ket-wrap">${items.map(x=>`<span class="ket-badge">${x}</span>`).join('')}</div>`;
+function setFilter(k){ filterAktif=k; renderFilterBar(); renderTable(); }
+function setUserFilter(k){ userFilterAktif=k; renderFilterBar(); renderUserTable(); }
+
+function getFilteredRows(aktif, searchId){
+  store=loadStore();
+  const q=(document.getElementById(searchId)?.value||'').toLowerCase();
+  return store.barang.filter(x=>{
+    if(aktif!=='SEMUA'&&x.kompi!==aktif) return false;
+    if(q&&!x.nama.toLowerCase().includes(q)&&!x.kode.toLowerCase().includes(q)) return false;
+    return true;
+  });
 }
 
 function renderTable(){
-  const q = (document.getElementById('searchInput').value||'').toLowerCase();
-  let rows = data.filter(x=>{
-    if(filterAktif!=='SEMUA' && x.kompi!==filterAktif) return false;
-    if(q && !x.nama.toLowerCase().includes(q) && !x.kode.toLowerCase().includes(q)) return false;
-    return true;
-  });
-  const tb = document.getElementById('tableBody');
-  if(!rows.length){
-    tb.innerHTML = `<tr><td colspan="11" style="text-align:center;color:var(--color-text-secondary,#888);padding:20px;">Tidak ada data</td></tr>`;
-    document.getElementById('tableInfo').textContent = '';
-    return;
-  }
-  tb.innerHTML = rows.map(x=>{
-    const siap = getSiapOps(x);
-    const warna = getKompiWarna(x.kompi);
+  const rows=getFilteredRows(filterAktif,'searchInput');
+  const tb=document.getElementById('tableBody');
+  if(!rows.length){ tb.innerHTML=`<tr><td colspan="11" style="text-align:center;color:#aaa;padding:20px">Tidak ada data</td></tr>`; document.getElementById('tableInfo').textContent=''; return; }
+  tb.innerHTML=rows.map(x=>{
+    const k=getKompi(x.kompi);
+    const siap=getSiap(x);
     return `<tr>
       <td><span class="kode-tag">${x.kode}</span></td>
-      <td style="font-weight:500;">${x.nama}</td>
-      <td><span class="badge kompi" style="background:${warna}22;color:${warna}">${getKompiLabel(x.kompi).replace('Kompi ','')}</span></td>
-      <td style="text-align:center;">${x.jumlah}</td>
-      <td style="text-align:center;"><span style="color:#2e7d32;font-weight:500;">${x.baik}</span></td>
-      <td style="text-align:center;"><span style="color:#c62828;font-weight:500;">${x.rusak}</span></td>
-      <td style="text-align:center;"><span style="color:#e65100;font-weight:500;">${x.pinjam}</span></td>
-      <td style="text-align:center;"><span class="badge siap">${siap}</span></td>
-      <td><span class="last-update">${formatTgl(x.update)}</span></td>
-      <td>${formatKeterangan(x.keterangan||"")}</td>
-      <td><button class="edit-btn" onclick="bukaEdit(${x.id})">Edit</button></td>
+      <td style="font-weight:500">${x.nama}</td>
+      <td><span class="badge" style="background:${k.warna}18;color:${k.warna}">${k.label.replace('Kompi ','')}</span></td>
+      <td style="text-align:center;font-weight:500">${x.jumlah}</td>
+      <td style="text-align:center;color:#2e7d32;font-weight:600">${x.baik}</td>
+      <td style="text-align:center;color:${x.rusak>0?'#c62828':'#aaa'};font-weight:${x.rusak?'600':'400'}">${x.rusak}</td>
+      <td style="text-align:center;color:${x.pinjam>0?'#e65100':'#aaa'}">${x.pinjam}</td>
+      <td style="text-align:center"><span class="badge ${siap>0?'':'rusak'}" style="${siap>0?'background:#e3f2fd;color:#1565c0':''}">${siap}</span></td>
+      <td style="font-size:11px;color:#888;white-space:nowrap">${fmtTgl(x.update)}<br><span style="color:#bbb">${x.updBy||''}</span></td>
+      <td>${formatKet(x.ket||'')}</td>
+      <td>
+        <button class="btn sm" onclick="bukaEdit(${x.id})" style="margin-bottom:2px">Edit</button>
+        <button class="btn sm danger" onclick="hapus(${x.id})">✕</button>
+      </td>
     </tr>`;
   }).join('');
-  document.getElementById('tableInfo').textContent = `Menampilkan ${rows.length} dari ${data.length} item`;
+  document.getElementById('tableInfo').textContent=`${rows.length} dari ${store.barang.length} item`;
 }
 
+function renderUserTable(){
+  const rows=getFilteredRows(userFilterAktif,'userSearchInput');
+  const tb=document.getElementById('userTableBody');
+  if(!tb) return;
+  if(!rows.length){ tb.innerHTML=`<tr><td colspan="10" style="text-align:center;color:#aaa;padding:20px">Tidak ada data</td></tr>`; document.getElementById('userTableInfo').textContent=''; return; }
+  tb.innerHTML=rows.map(x=>{
+    const k=getKompi(x.kompi);
+    const siap=getSiap(x);
+    return `<tr>
+      <td><span class="kode-tag">${x.kode}</span></td>
+      <td style="font-weight:500">${x.nama}</td>
+      <td><span class="badge" style="background:${k.warna}18;color:${k.warna}">${k.label.replace('Kompi ','')}</span></td>
+      <td style="text-align:center;font-weight:500">${x.jumlah}</td>
+      <td style="text-align:center;color:#2e7d32;font-weight:600">${x.baik}</td>
+      <td style="text-align:center;color:${x.rusak>0?'#c62828':'#aaa'};font-weight:${x.rusak?'600':'400'}">${x.rusak}</td>
+      <td style="text-align:center;color:${x.pinjam>0?'#e65100':'#aaa'}">${x.pinjam}</td>
+      <td style="text-align:center"><span class="badge" style="background:#e3f2fd;color:#1565c0">${siap}</span></td>
+      <td style="font-size:11px;color:#888;white-space:nowrap">${fmtTgl(x.update)}</td>
+      <td>${formatKet(x.ket||'')}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('userTableInfo').textContent=`${rows.length} dari ${store.barang.length} item`;
+}
+
+function renderAll(){
+  store=loadStore();
+  renderStats();
+  renderFilterBar();
+  const isAdmin=currentUser.role==='admin'||currentUser.role==='master';
+  if(isAdmin) renderTable();
+  else renderUserTable();
+}
+
+// ============================================================
+// CRUD BARANG
+// ============================================================
 function tambahBarang(){
-  const kompi = document.getElementById('formKompi').value;
-  const nama = document.getElementById('formNama').value.trim();
-  const jumlah = parseInt(document.getElementById('formJumlah').value)||0;
-  const baik = parseInt(document.getElementById('formBaik').value)||0;
-  const rusak = parseInt(document.getElementById('formRusak').value)||0;
-  const pinjam = parseInt(document.getElementById('formPinjam').value)||0;
-  const keterangan = document.getElementById('formKeterangan').value.trim();
-  if(!nama){ alert('Nama barang harus diisi'); return; }
-  counter[kompi] = (counter[kompi]||0)+1;
-  const nomor = String(counter[kompi]).padStart(3,'0');
-  const kode = `${kompi}-${nomor}`;
-  const newId = Math.max(0,...data.map(x=>x.id))+1;
-  data.push({id:newId,kode,kompi,nama,jumlah,baik,rusak,pinjam,keterangan,update:now()});
+  const kompi=document.getElementById('formKompi').value;
+  const nama=document.getElementById('formNama').value.trim();
+  const jumlah=+document.getElementById('formJumlah').value||0;
+  const baik=+document.getElementById('formBaik').value||0;
+  const rusak=+document.getElementById('formRusak').value||0;
+  const pinjam=+document.getElementById('formPinjam').value||0;
+  const ket=document.getElementById('formKet').value;
+  if(!nama){ toast('Nama barang harus diisi','err'); return; }
+  store=loadStore();
+  store.counter[kompi]=(store.counter[kompi]||0)+1;
+  const kode=`${kompi}-${String(store.counter[kompi]).padStart(3,'0')}`;
+  const newId=store.barang.length?Math.max(...store.barang.map(x=>x.id))+1:1;
+  const item={id:newId,kode,kompi,nama,jumlah,baik,rusak,pinjam,ket,update:nowDate(),updBy:currentUser.username};
+  store.barang.push(item);
+  saveStore(store);
+  addNotif(`Barang baru ditambahkan: ${nama}`,`Kode ${kode} oleh ${currentUser.nama}`,'all');
   renderAll();
   resetForm();
+  toast(`✅ ${nama} berhasil ditambahkan`);
+  updateNotifDot();
 }
+
 function resetForm(){
-  document.getElementById('formNama').value='';
-  document.getElementById('formJumlah').value=1;
-  document.getElementById('formBaik').value=1;
-  document.getElementById('formRusak').value=0;
-  document.getElementById('formPinjam').value=0;
-  document.getElementById('formKeterangan').value='';
+  ['formNama'].forEach(id=>document.getElementById(id).value='');
+  ['formJumlah','formBaik'].forEach(id=>document.getElementById(id).value=1);
+  ['formRusak','formPinjam'].forEach(id=>document.getElementById(id).value=0);
+  document.getElementById('formKet').value='';
 }
 
 function bukaEdit(id){
-  editingId = id;
-  const x = data.find(d=>d.id===id);
+  editingId=id;
+  store=loadStore();
+  const x=store.barang.find(d=>d.id===id);
   if(!x) return;
   document.getElementById('editNama').value=x.nama;
   document.getElementById('editJumlah').value=x.jumlah;
   document.getElementById('editBaik').value=x.baik;
   document.getElementById('editRusak').value=x.rusak;
   document.getElementById('editPinjam').value=x.pinjam;
-  document.getElementById('editKeterangan').value=x.keterangan||'';
-  document.getElementById('modalEdit').classList.remove('hidden');
+  document.getElementById('editKet').value=x.ket||'';
+  document.getElementById('modalEdit').classList.add('show');
 }
-function tutupModal(){ document.getElementById('modalEdit').classList.add('hidden'); editingId=null; }
+
 function simpanEdit(){
-  const x = data.find(d=>d.id===editingId);
-  if(!x) return;
-  x.nama = document.getElementById('editNama').value.trim()||x.nama;
-  x.jumlah = parseInt(document.getElementById('editJumlah').value)||0;
-  x.baik = parseInt(document.getElementById('editBaik').value)||0;
-  x.rusak = parseInt(document.getElementById('editRusak').value)||0;
-  x.pinjam = parseInt(document.getElementById('editPinjam').value)||0;
-  x.keterangan = document.getElementById('editKeterangan').value.trim();
-  x.update = now();
-  tutupModal();
+  store=loadStore();
+  const idx=store.barang.findIndex(d=>d.id===editingId);
+  if(idx===-1) return;
+  const x=store.barang[idx];
+  x.nama=document.getElementById('editNama').value.trim()||x.nama;
+  x.jumlah=+document.getElementById('editJumlah').value||0;
+  x.baik=+document.getElementById('editBaik').value||0;
+  x.rusak=+document.getElementById('editRusak').value||0;
+  x.pinjam=+document.getElementById('editPinjam').value||0;
+  x.ket=document.getElementById('editKet').value;
+  x.update=nowDate();
+  x.updBy=currentUser.username;
+  saveStore(store);
+  addNotif(`Data diperbarui: ${x.nama}`,`Oleh ${currentUser.nama} pada ${fmtTgl(x.update)}`,'all');
+  tutupModal('modalEdit');
   renderAll();
+  toast(`✅ ${x.nama} berhasil diperbarui`);
+  updateNotifDot();
 }
 
-function renderAll(){
-  renderStats(); renderFilterBar(); renderTable(); renderRekapKompi();
+function hapus(id){
+  store=loadStore();
+  const x=store.barang.find(d=>d.id===id);
+  if(!x) return;
+  if(!confirm(`Hapus barang "${x.nama}" (${x.kode})?`)) return;
+  store.barang=store.barang.filter(d=>d.id!==id);
+  saveStore(store);
+  addNotif(`Barang dihapus: ${x.nama}`,`Kode ${x.kode} dihapus oleh ${currentUser.nama}`,'admin_all');
+  renderAll();
+  toast(`🗑️ ${x.nama} dihapus`,'info');
+  updateNotifDot();
 }
 
-// ========== BOT WA ==========
-const chatHistory = [];
-
-const QUICK = [
-  'Jammer tersedia berapa?',
-  'Rekap semua kompi',
-  'Barang rusak',
-  'Status siap ops',
-  'Update terakhir',
-];
-
-function renderQuickCmds(){
-  document.getElementById('quickCmds').innerHTML = QUICK.map(q=>
-    `<button class="quick-cmd" onclick="kirimQ('${q}')">${q}</button>`
-  ).join('');
+function exportCSV(){
+  store=loadStore();
+  const h=['Kode','Nama','Kompi','Total','Baik','Rusak','Pinjam','Siap Ops','Keterangan','Update','Diupdate oleh'];
+  const rows=store.barang.map(x=>[x.kode,x.nama,getKompi(x.kompi).label,x.jumlah,x.baik,x.rusak,x.pinjam,getSiap(x),(x.ket||'').replace(/\n/g,' | '),x.update,x.updBy||'']);
+  const csv=[h,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`yonkomlek_${nowDate()}.csv`;
+  a.click();
+  toast('📥 Export CSV berhasil');
 }
 
-function kirimQ(txt){ document.getElementById('waInput').value=txt; kirimPesan(); }
-
-function kirimPesan(){
-  const inp = document.getElementById('waInput');
-  const txt = inp.value.trim();
-  if(!txt) return;
-  inp.value='';
-  addMsg(txt,'user');
-  setTimeout(()=>{
-    const resp = botReply(txt);
-    addMsg(resp,'bot');
-  }, 400);
-}
-
-function addMsg(txt,who){
-  const cm = document.getElementById('chatMessages');
-  const d = document.createElement('div');
-  d.className = `msg ${who}`;
-  const now2 = new Date();
-  const time = now2.getHours().toString().padStart(2,'0')+':'+now2.getMinutes().toString().padStart(2,'0');
-  d.innerHTML = txt.replace(/\n/g,'<br>') + `<div class="msg-time">${time}</div>`;
-  cm.appendChild(d);
-  cm.scrollTop = cm.scrollHeight;
-}
-
-function botReply(q){
-  const ql = q.toLowerCase();
-
-  // Rekap semua
-  if(ql.includes('rekap') || ql.includes('semua') || ql.includes('total')){
-    const total = data.reduce((s,x)=>s+x.jumlah,0);
-    const baik = data.reduce((s,x)=>s+x.baik,0);
-    const rusak = data.reduce((s,x)=>s+x.rusak,0);
-    const siap = data.reduce((s,x)=>s+getSiapOps(x),0);
-    return `📊 *REKAP INVENTARIS YONKOMLEK*\n━━━━━━━━━━━━━━\nTotal Item: ${data.length} jenis\nTotal Unit: ${total} pcs\n✅ Kondisi Baik: ${baik}\n❌ Rusak: ${rusak}\n⚡ Siap Ops: ${siap}\n\nKetik nama kompi untuk detail.`;
+// ============================================================
+// USER MANAGEMENT (Admin)
+// ============================================================
+function renderUserAdmin(){
+  users=loadUsers();
+  const pending=users.filter(x=>x.status==='pending');
+  const pl=document.getElementById('pendingList');
+  if(!pending.length){ pl.innerHTML='<div style="color:#aaa;font-size:13px;padding:12px 0">Tidak ada permintaan pendaftaran</div>'; }
+  else{
+    pl.innerHTML=pending.map(u=>`
+      <div class="user-list-item">
+        <div class="u-avatar">${u.nama[0]}</div>
+        <div class="u-info">
+          <div class="u-name">${u.nama}</div>
+          <div class="u-meta">@${u.username} · ${u.unit} · Daftar: ${u.joinDate}</div>
+        </div>
+        <div class="u-actions">
+          <button class="btn sm success" onclick="approveUser('${u.id}')">✓ Setujui</button>
+          <button class="btn sm danger" onclick="rejectUser('${u.id}')">✕ Tolak</button>
+        </div>
+      </div>`).join('');
   }
-
-  // Barang rusak
-  if(ql.includes('rusak')){
-    const rusaks = data.filter(x=>x.rusak>0);
-    if(!rusaks.length) return '✅ Tidak ada barang rusak saat ini.';
-    return '🔴 *BARANG RUSAK:*\n' + rusaks.map(x=>`• ${x.nama} (${x.kode}): ${x.rusak} unit rusak`).join('\n');
-  }
-
-  // Status siap ops
-  if(ql.includes('siap') || ql.includes('ops')){
-    const rendah = data.filter(x=>getSiapOps(x)===0);
-    const resp = data.map(x=>`• ${x.nama}: ${getSiapOps(x)} siap ops`).slice(0,6).join('\n');
-    const warn = rendah.length ? `\n⚠️ ${rendah.length} item TIDAK siap ops!` : '';
-    return `⚡ *STATUS SIAP OPS:*\n${resp}${warn}`;
-  }
-
-  // Update terakhir
-  if(ql.includes('update') || ql.includes('terakhir')){
-    const sorted = [...data].sort((a,b)=>b.update.localeCompare(a.update)).slice(0,5);
-    return '🕐 *UPDATE TERAKHIR:*\n' + sorted.map(x=>`• ${x.nama}: ${formatTgl(x.update)}`).join('\n');
-  }
-
-  // Dipinjam
-  if(ql.includes('pinjam') || ql.includes('dipinjam')){
-    const pinj = data.filter(x=>x.pinjam>0);
-    if(!pinj.length) return '✅ Tidak ada barang dipinjam saat ini.';
-    return '🟡 *BARANG DIPINJAM:*\n' + pinj.map(x=>`• ${x.nama} (${x.kode}): ${x.pinjam} unit`).join('\n');
-  }
-
-  // Cek nama barang spesifik
-  const match = data.filter(x=>x.nama.toLowerCase().includes(ql) || x.kode.toLowerCase().includes(ql));
-  if(match.length){
-    return match.map(x=>`📦 *${x.nama}*\nKode: ${x.kode}\nKompi: ${getKompiLabel(x.kompi)}\nTotal: ${x.jumlah} | Baik: ${x.baik} | Rusak: ${x.rusak}\nDipinjam: ${x.pinjam} | Siap Ops: ${getSiapOps(x)}\nUpdate: ${formatTgl(x.update)}`).join('\n\n');
-  }
-
-  // Kompi spesifik
-  const kompiMatch = KOMPI_LIST.find(k=>ql.includes(k.label.toLowerCase().replace('kompi ','')) || ql.includes(k.kode.toLowerCase()));
-  if(kompiMatch){
-    const items = data.filter(x=>x.kompi===kompiMatch.kode);
-    if(!items.length) return `Tidak ada data untuk ${kompiMatch.label}.`;
-    const siapTotal = items.reduce((s,x)=>s+getSiapOps(x),0);
-    return `🪖 *${kompiMatch.label.toUpperCase()}*\nTotal: ${items.length} jenis | Siap Ops: ${siapTotal} unit\n\n` +
-      items.map(x=>`• ${x.nama}: ${getSiapOps(x)} siap / ${x.jumlah} total`).join('\n');
-  }
-
-  return `❓ Perintah tidak dikenali.\nCoba:\n• "jammer tersedia"\n• "rekap semua"\n• "barang rusak"\n• "kompi komunikasi"\n• nama barang spesifik`;
-}
-
-function renderPanduan(){
-  const cmds = [
-    {cmd:'[nama barang]',desc:'Cek stok barang tertentu, contoh: "jammer"'},
-    {cmd:'rekap semua',desc:'Tampilkan ringkasan seluruh inventaris'},
-    {cmd:'barang rusak',desc:'Daftar semua barang dengan kondisi rusak'},
-    {cmd:'siap ops',desc:'Status barang yang siap operasional'},
-    {cmd:'dipinjam',desc:'Daftar barang sedang dipinjam'},
-    {cmd:'update terakhir',desc:'Kapan terakhir data diperbarui'},
-    {cmd:'kompi komunikasi',desc:'Rekap barang per kompi'},
-  ];
-  document.getElementById('panduanList').innerHTML = cmds.map(c=>
-    `<div style="padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary,#eee);">
-      <span style="font-family:var(--font-mono,monospace);font-size:11px;background:var(--color-background-secondary,#f0f0f0);padding:2px 6px;border-radius:4px;color:#1565c0;">${c.cmd}</span>
-      <span style="color:var(--color-text-secondary,#666);margin-left:6px;font-size:12px;">${c.desc}</span>
-    </div>`
-  ).join('');
-}
-
-function renderRekapKompi(){
-  const el = document.getElementById('rekapKompi');
-  if(!el) return;
-  el.innerHTML = KOMPI_LIST.map(k=>{
-    const items = data.filter(x=>x.kompi===k.kode);
-    if(!items.length) return '';
-    const siap = items.reduce((s,x)=>s+getSiapOps(x),0);
-    const rusak = items.reduce((s,x)=>s+x.rusak,0);
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary,#eee);">
-      <span style="font-size:12px;color:${k.warna};font-weight:500;">${k.label}</span>
-      <span style="font-size:12px;color:var(--color-text-secondary,#666);">${items.length} item · <span style="color:#2e7d32;">${siap} siap</span>${rusak?` · <span style="color:#c62828;">${rusak} rusak</span>`:''}</span>
+  const al=document.getElementById('allUserList');
+  const others=users.filter(x=>x.status==='approved'||x.id==='u0');
+  al.innerHTML=others.map(u=>{
+    const isMaster=currentUser.role==='master';
+    const isMe=u.id===currentUser.id;
+    const roleLabel=u.role==='master'?'Master':u.role==='admin'?'Admin':'User';
+    const roleCls=u.role==='master'?'role-master':u.role==='admin'?'role-admin':'role-user';
+    return `<div class="user-list-item">
+      <div class="u-avatar">${u.nama[0]}</div>
+      <div class="u-info">
+        <div class="u-name">${u.nama} ${isMe?'<span style="color:#888;font-size:10px">(Anda)</span>':''}</div>
+        <div class="u-meta">@${u.username} · ${u.unit}</div>
+      </div>
+      <div class="u-actions">
+        <span class="role-badge ${roleCls}">${roleLabel}</span>
+        ${(isMaster&&!isMe&&u.role!=='master')?`<button class="btn sm primary" onclick="bukaRole('${u.id}')">Atur Hak</button>`:''}
+      </div>
     </div>`;
   }).join('');
 }
 
-function switchTab(t){
-  document.getElementById('viewGudang').classList.toggle('hidden', t!=='gudang');
-  document.getElementById('viewBot').classList.toggle('hidden', t!=='bot');
-  document.getElementById('tabGudang').classList.toggle('active', t==='gudang');
-  document.getElementById('tabBot').classList.toggle('active', t!=='gudang');
-  if(t==='bot'){ renderRekapKompi(); renderQuickCmds(); }
+function approveUser(id){
+  users=loadUsers();
+  const u=users.find(x=>x.id===id);
+  if(!u) return;
+  u.status='approved';
+  saveUsers(users);
+  addNotif(`Pendaftaran disetujui: ${u.nama}`,`Admin ${currentUser.nama} menyetujui akun @${u.username}`,u.id);
+  addNotif(`Akun baru diaktifkan: ${u.nama}`,`User @${u.username} unit ${u.unit} telah diaktifkan`,'admin_all');
+  renderUserAdmin();
+  updateNotifDot();
+  toast(`✅ Akun ${u.nama} disetujui`);
 }
 
-// Init
-const tgl = new Date();
-document.getElementById('tanggalHeader').textContent = tgl.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-renderAll();
-renderPanduan();
-addMsg('Selamat datang di Yonkomlek Bot Data 🪖\nSilakan ketik pertanyaan atau pilih perintah cepat di atas.','bot');
+function rejectUser(id){
+  users=loadUsers();
+  const u=users.find(x=>x.id===id);
+  if(!u) return;
+  if(!confirm(`Tolak pendaftaran ${u.nama}?`)) return;
+  u.status='rejected';
+  saveUsers(users);
+  renderUserAdmin();
+  toast(`✕ Pendaftaran ${u.nama} ditolak`,'info');
+}
+
+function bukaRole(id){
+  roleTargetId=id;
+  users=loadUsers();
+  const u=users.find(x=>x.id===id);
+  if(!u) return;
+  document.getElementById('roleTargetName').textContent=u.nama;
+  document.getElementById('roleTargetUnit').textContent=`@${u.username} · ${u.unit}`;
+  document.getElementById('roleSelect').value=u.role==='master'?'admin':u.role;
+  document.getElementById('modalRole').classList.add('show');
+}
+
+function simpanRole(){
+  users=loadUsers();
+  const u=users.find(x=>x.id===roleTargetId);
+  if(!u) return;
+  const newRole=document.getElementById('roleSelect').value;
+  const oldRole=u.role;
+  u.role=newRole;
+  saveUsers(users);
+  addNotif(`Hak akses diubah: ${u.nama}`,`Dari ${oldRole} → ${newRole} oleh Admin Master`,'admin_all');
+  tutupModal('modalRole');
+  renderUserAdmin();
+  toast(`✅ Hak akses ${u.nama} diubah menjadi ${newRole}`);
+}
+
+// ============================================================
+// AI CHAT BOT
+// ============================================================
+function toggleChat(){
+  chatOpen=!chatOpen;
+  document.getElementById('chatPopup').classList.toggle('open',chatOpen);
+  if(chatOpen){
+    document.getElementById('chatUnread').classList.add('hidden');
+    document.getElementById('chatInput').focus();
+  }
+}
+
+function renderQuickCmds(){
+  document.getElementById('chatQuick').innerHTML=QUICK_CMDS.map(q=>
+    `<button class="chat-qcmd" onclick="kirimQ('${q}')">${q}</button>`
+  ).join('');
+}
+
+function kirimQ(t){ document.getElementById('chatInput').value=t; kirimChat(); }
+
+async function kirimChat(){
+  const inp=document.getElementById('chatInput');
+  const txt=inp.value.trim();
+  if(!txt) return;
+  inp.value='';
+  addChatMsg(txt,'user');
+  const thinkId='think'+Date.now();
+  addChatMsg('<span class="cmsg-typing"><span></span><span></span><span></span></span>','thinking',thinkId);
+  try{
+    store=loadStore();
+    const dbSummary=buildDBSummary();
+    const reply=await callAI(txt,dbSummary);
+    document.getElementById(thinkId)?.remove();
+    addChatMsg(reply,'bot');
+  }catch(e){
+    document.getElementById(thinkId)?.remove();
+    // Fallback ke rule-based jika AI gagal
+    addChatMsg(ruleBasedReply(txt),'bot');
+  }
+}
+
+function buildDBSummary(){
+  store=loadStore();
+  const d=store.barang;
+  const lines=d.map(x=>`- ${x.nama} [${x.kode}] Kompi:${getKompi(x.kompi).label} Total:${x.jumlah} Baik:${x.baik} Rusak:${x.rusak} Pinjam:${x.pinjam} SiapOps:${getSiap(x)} Update:${x.update} Ket:${(x.ket||'').replace(/\n/g,'|')}`);
+  const total=d.reduce((s,x)=>s+x.jumlah,0);
+  const siapAll=d.reduce((s,x)=>s+getSiap(x),0);
+  const rusakAll=d.reduce((s,x)=>s+x.rusak,0);
+  return `DATABASE INVENTARIS YONKOMLEK (${new Date().toLocaleDateString('id-ID')}):\nTotal ${d.length} jenis barang, ${total} unit total, ${siapAll} siap ops, ${rusakAll} rusak.\n\nDATA LENGKAP:\n${lines.join('\n')}`;
+}
+
+async function callAI(userMsg, dbCtx){
+  const systemPrompt=`Kamu adalah asisten inventaris militer bernama "Asisten YK" untuk satuan Yonkomlek (Batalyon Komunikasi Elektronik). Tugasmu menjawab pertanyaan tentang data inventaris barang satuan berdasarkan database yang diberikan. Gunakan bahasa Indonesia yang formal dan ringkas. Jika ditanya tentang stok/ketersediaan, selalu berikan angka spesifik dari database. Jika ada barang rusak atau tidak siap ops, sampaikan dengan tegas. Format jawaban jelas dan mudah dibaca. Jangan tambahkan informasi yang tidak ada di database.
+
+${dbCtx}`;
+  const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system:systemPrompt,
+      messages:[{role:'user',content:userMsg}]
+    })
+  });
+  if(!resp.ok) throw new Error('API error');
+  const data=await resp.json();
+  return data.content?.[0]?.text||'Maaf, tidak dapat memproses pertanyaan.';
+}
+
+// Fallback rule-based (jika API tidak tersedia)
+function ruleBasedReply(q){
+  store=loadStore();
+  const d=store.barang;
+  const ql=q.toLowerCase();
+  if(/rekap|semua|total|laporan/.test(ql)){
+    const t=d.reduce((s,x)=>s+x.jumlah,0),b=d.reduce((s,x)=>s+x.baik,0),r=d.reduce((s,x)=>s+x.rusak,0),s=d.reduce((s,x)=>s+getSiap(x),0);
+    return `📊 REKAP INVENTARIS\nTotal: ${d.length} jenis / ${t} unit\n✅ Baik: ${b} | ❌ Rusak: ${r} | ⚡ Siap Ops: ${s}`;
+  }
+  if(/rusak/.test(ql)){ const rs=d.filter(x=>x.rusak>0); return rs.length?'🔴 Barang rusak:\n'+rs.map(x=>`• ${x.nama}: ${x.rusak} unit`).join('\n'):'✅ Tidak ada barang rusak'; }
+  if(/siap|ops/.test(ql)){ return '⚡ Siap Ops:\n'+d.map(x=>`• ${x.nama}: ${getSiap(x)}`).join('\n'); }
+  if(/pinjam/.test(ql)){ const ps=d.filter(x=>x.pinjam>0); return ps.length?'🟡 Dipinjam:\n'+ps.map(x=>`• ${x.nama}: ${x.pinjam} unit`).join('\n'):'✅ Tidak ada yang dipinjam'; }
+  const match=d.filter(x=>x.nama.toLowerCase().includes(ql)||x.kode.toLowerCase().includes(ql));
+  if(match.length) return match.map(x=>`📦 ${x.nama} [${x.kode}]\nTotal: ${x.jumlah} | Baik: ${x.baik} | Rusak: ${x.rusak} | Siap: ${getSiap(x)}\n${x.ket?'Ket: '+x.ket:''}`).join('\n\n');
+  const km=KOMPI_LIST.find(k=>ql.includes(k.label.toLowerCase().replace('kompi ',''))||ql.includes(k.kode.toLowerCase()));
+  if(km){ const items=d.filter(x=>x.kompi===km.kode); return `🪖 ${km.label}\n`+items.map(x=>`• ${x.nama}: ${getSiap(x)} siap / ${x.jumlah} total`).join('\n'); }
+  return `❓ Saya tidak menemukan data yang sesuai. Coba tanya:\n• "rekap semua"\n• "jammer tersedia"\n• "barang rusak"\n• "kompi komunikasi"`;
+}
+
+function addChatMsg(txt,who,id){
+  const cm=document.getElementById('chatMessages');
+  const d=document.createElement('div');
+  d.className=`cmsg ${who}`;
+  if(id) d.id=id;
+  d.innerHTML=txt.replace(/\n/g,'<br>')+`<div class="cmsg-time">${nowTime()}</div>`;
+  cm.appendChild(d);
+  cm.scrollTop=cm.scrollHeight;
+  if(!chatOpen){
+    const cu=document.getElementById('chatUnread');
+    cu.classList.remove('hidden');
+    cu.textContent=parseInt(cu.textContent||0)+1;
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+(function init(){
+  if(tryAutoLogin()){
+    launchApp();
+  }
+})();
 </script>
 </body>
 </html>
